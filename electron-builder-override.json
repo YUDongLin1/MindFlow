@@ -1,0 +1,66 @@
+{
+  "electronDist": "E:\\mindflow-electron-dist",
+  "disableAsarIntegrity": true,
+  "directories": {
+    "output": "E:\\mindflow-release-build",
+    "buildResources": "E:\\研究生文件\\moodnote\\build-resources"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/dist/**/*",
+    "package.json",
+    "!electron/main.ts",
+    "!electron/preload.ts",
+    "!electron/tsconfig.json",
+    "!src/**/*",
+    "!scripts/**/*",
+    "!docs/**/*",
+    "!dist_old_*/**/*",
+    "!dist-electron*/**/*",
+    "!nsis-*/**/*",
+    "!verification-screenshots/**/*",
+    "!public/**/*",
+    "!.qoder/**/*",
+    "!.vscode/**/*",
+    "!.workbuddy/**/*",
+    "!**/*.map",
+    "!**/*.txt",
+    "!**/*.ps1",
+    "!**/*.log",
+    "!**/*.md"
+  ],
+  "extraResources": [
+    {
+      "from": "E:\\研究生文件\\moodnote\\build-resources\\windows-icons",
+      "to": "icons",
+      "filter": ["**/*"]
+    }
+  ],
+  "extraMetadata": {
+    "name": "mindflow",
+    "productName": "MindFlow",
+    "version": "1.0.1",
+    "description": "MindFlow 智流日志 - 本地优先的个人成长记录工具",
+    "author": "MindFlow",
+    "main": "electron/dist/main.js"
+  },
+  "win": {
+    "icon": "E:\\研究生文件\\moodnote\\build-resources\\icon.ico",
+    "target": ["nsis"],
+    "signAndEditExecutable": false,
+    "artifactName": "MindFlow-Setup-${version}-${arch}.${ext}"
+  },
+  "nsis": {
+    "include": "E:\\研究生文件\\moodnote\\build-resources\\installer.nsh",
+    "warningsAsErrors": false,
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "allowElevation": false,
+    "installerIcon": "E:\\研究生文件\\moodnote\\build-resources\\icon.ico",
+    "uninstallerIcon": "E:\\研究生文件\\moodnote\\build-resources\\icon.ico",
+    "deleteAppDataOnUninstall": false,
+    "createDesktopShortcut": true,
+    "shortcutName": "MindFlow"
+  }
+}

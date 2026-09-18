@@ -32,6 +32,8 @@ dist-ssr
 # Build directories
 dist/
 electron/dist/
+dist_old_*/
+package-lock.bak
 # Code signing certificates and sensitive files
 certs/
 *.pfx
@@ -58,3 +60,33 @@ out/
 *CHECKLIST.md
 PROGRESS.md
 FIXES_SUMMARY.md
+
+# ===== OSS 发布补充（2026-09-18）=====
+# AI 助手工作区（任意层级）/ 内部过程文档（不对外）
+.qoder/
+.workbuddy/
+/HANDOFF.md
+/overview.md
+# 内含个人信息/内部素材，待作者审阅后决定是否公开
+/docs/MiMo-Desktop-内测申请-素材.md
+# 根目录调试残留（斜杠前缀仅匹配根目录，不影响 scripts/ 下的正式脚本）
+/*.ps1
+/*.txt
+/*.log
+/_local_archive/
+# 构建产物与本地工具
+/dist-electron2/
+/nsis-3.10/
+/nsis-3.10.zip
+/verification-screenshots/
+/dist_old_*/
+
+# 一次性验收测试（MF-2026-001/002/003/004，尚未修复，不进公开仓库；修好后删除对应行即可纳入）
+/src/test/tray.test.ts
+/src/test/calendar-todo.test.ts
+/src/test/interface-layout.test.ts
+/src/test/document-cleanup.test.ts
+/src/test/localforage-mock.ts
+/src/test/deliverables-summary.md
+/src/test/test-execution-plan.md
+/src/test/test-report-template.md
