@@ -1,5 +1,5 @@
 /**
- * Global type declarations for MoodsNote
+ * Global type declarations for MindFlow
  * Extends the Window interface with Electron API types
  */
 
@@ -10,6 +10,45 @@ export interface ElectronAPI {
   send: (channel: string, data: any) => void
   receive: (channel: string, func: (...args: any[]) => void) => void
   media: MediaAPI
+  usage?: UsageAPI
+  ai?: AIAPI
+}
+
+/**
+ * 外部应用使用时长 API（IPC: usage:get-apps）
+ * 主进程按自然日累计（含周末与节假日），返回按 seconds 降序
+ */
+export interface ExternalAppUsage {
+  app: string
+  exe: string
+  seconds: number
+}
+
+export interface UsageAPI {
+  getApps: () => Promise<ExternalAppUsage[]>
+}
+
+/**
+ * AI 请求主进程转发 API（IPC: window.api.ai.fetch）
+ * 用于规避渲染进程 CORS / 代理限制
+ */
+export interface AIFetchPayload {
+  url: string
+  method?: string
+  headers?: Record<string, string>
+  body?: string
+  timeoutMs?: number
+}
+
+export interface AIFetchResult {
+  ok: boolean
+  status: number
+  headers: Record<string, string>
+  bodyText: string
+}
+
+export interface AIAPI {
+  fetch: (payload: AIFetchPayload) => Promise<AIFetchResult>
 }
 
 export interface MediaManifestEntry {

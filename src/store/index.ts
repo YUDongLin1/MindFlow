@@ -12,10 +12,11 @@ import {
 } from './types'
 import { handleStorageError } from '@/utils/storageErrorHandler'
 import { countWordsInHtml } from '@/utils/wordCount'
+import journalModule from './journal'
 
 localforage.config({
-  name: 'MoodsNote',
-  storeName: 'mood_notes_store',
+  name: 'MindFlow',
+  storeName: 'mindflow_store',
 })
 
 // Type guard functions for runtime validation
@@ -794,7 +795,7 @@ const store: StoreOptions<State> = {
     },
   },
   modules: {
-    // Add modules here if needed
+    journal: journalModule,
   },
 }
 

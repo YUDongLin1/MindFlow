@@ -76,3 +76,9 @@ export interface MoodDetails {
   emoji: string
   color: string
 }
+
+export interface EntryMetadata {
+  location?: string
+  weather?: string
+  temperature?: number
+}
