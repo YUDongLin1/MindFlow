@@ -175,9 +175,17 @@ flowchart LR
 
 ## 快速开始
 
-### 直接下载（Windows）
+### 直接下载
 
-👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)**（NSIS 安装版，约 87 MB，见 [Releases](https://github.com/YUDongLin1/MindFlow/releases)）
+👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)**（Windows NSIS 安装版，约 78 MB）
+
+| 平台 | 产物 |
+|------|------|
+| Windows | `MindFlow-Setup-1.0.1-x64.exe`（安装版）、`MindFlow.1.0.1.exe`（便携版） |
+| macOS | `MindFlow-1.0.1-universal.dmg`（Intel + Apple Silicon，未签名，首次启动需在「系统设置 → 隐私与安全性」允许） |
+| Linux | `MindFlow-1.0.1.AppImage`、`mindflow_1.0.1_amd64.deb` |
+
+全部产物见 [Releases](https://github.com/YUDongLin1/MindFlow/releases)，由 GitHub Actions 在 tag 推送时自动构建并发布。
 
 ### 从源码运行
 
