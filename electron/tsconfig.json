@@ -13,6 +13,7 @@
   },
   "include": [
     "main.ts",
-    "preload.ts"
+    "preload.ts",
+    "usage-monitor.ts"
   ]
 }

@@ -1,6 +1,6 @@
 {
-  "name": "moodsnote-electron",
-  "version": "1.0.5",
+  "name": "mindflow-electron",
+  "version": "1.0.0",
   "type": "commonjs",
   "main": "dist/main.js",
   "scripts": {

@@ -1,7 +1,9 @@
-import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, Menu, powerMonitor, net, Tray, nativeImage } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { existsSync } from 'fs';
 import * as crypto from 'crypto';
+import * as usageMonitor from './usage-monitor';
 
 // Extend the Electron app to include isQuitting property
 declare global {
@@ -12,7 +14,44 @@ declare global {
   }
 }
 
+// 便携版（electron-builder portable）每次运行解压到随机临时目录，
+// 必须把 userData 固定到 exe 所在目录下，否则关闭软件后数据全部丢失。
+// 必须在 app.whenReady() 及任何 app.getPath('userData') 调用之前执行。
+if (process.env.PORTABLE_EXECUTABLE_DIR) {
+  const portableDataDir = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'data');
+  app.setPath('userData', portableDataDir);
+  console.log('[portable] 便携模式，数据目录已固定为:', portableDataDir);
+}
+
+// ---------------------------------------------------------------------------
+// 渲染进程沙箱与 GPU 兼容处理（必须在 app ready 之前设置）
+//
+// 背景：在部分 Windows 环境下（尤其是启用了第三方安全软件、或用户目录
+// 带有中文/非 ASCII 路径时），Chromium 的渲染进程沙箱初始化会失败，表现为
+// 窗口一闪而过、renderer 进程以 render-process-gone {reason:"killed"} 崩溃。
+// 这里显式关闭渲染进程沙箱与硬件加速，避免用户必须手动追加 --no-sandbox。
+// 同时保留命令行优先级：用户/CI 已显式传入的参数不被覆盖。
+// ---------------------------------------------------------------------------
+const userArgv = process.argv.slice(1);
+const hasNoSandbox = userArgv.includes('--no-sandbox');
+const hasDisableGpu = userArgv.includes('--disable-gpu');
+
+if (process.platform === 'win32') {
+  if (!hasNoSandbox) {
+    app.commandLine.appendSwitch('no-sandbox');
+    app.commandLine.appendSwitch('disable-setuid-sandbox');
+  }
+  if (!hasDisableGpu) {
+    // 部分集显/老驱动环境下 GPU 进程反复崩溃，关闭硬件加速更稳定
+    app.disableHardwareAcceleration();
+  }
+  // 避免网络服务进程在本机网络栈上的偶发崩溃
+  app.commandLine.appendSwitch('disable-features', 'NetworkServiceSandbox');
+  console.log('[sandbox] Windows 兼容模式：已关闭渲染沙箱与硬件加速');
+}
+
 let mainWindow: BrowserWindow | null;
+let tray: Tray | null = null;
 
 // Get the media storage directory
 function getMediaStoragePath(): string {
@@ -31,16 +70,124 @@ async function ensureMediaDirectory(): Promise<void> {
   }
 }
 
+// Resolve the window icon at runtime:
+// - packaged builds: icons copied via electron-builder extraResources to resources/icons
+// - dev fallback: public/AppIcons in the repository
+function getWindowIconPath(): string | undefined {
+  const iconFileName =
+    process.platform === 'win32' ? 'icon-256.png'
+    : process.platform === 'darwin' ? 'icon-512.png'
+    : 'icon-512.png';
+
+  if (app.isPackaged) {
+    const packagedIcon = path.join(process.resourcesPath, 'icons', iconFileName);
+    if (existsSync(packagedIcon)) {
+      return packagedIcon;
+    }
+  }
+
+  const devIcon = path.join(__dirname, '../../public/AppIcons/Assets.xcassets/AppIcon.appiconset/512.png');
+  if (existsSync(devIcon)) {
+    return devIcon;
+  }
+
+  return undefined;
+}
+
+// Get the tray icon path at runtime
+function getTrayIconPath(): string | undefined {
+  // For tray icons, use a smaller icon (16x16 or 32x32)
+  const iconFileName = process.platform === 'win32' ? 'icon-256.png' : 'icon-512.png';
+
+  if (app.isPackaged) {
+    const packagedIcon = path.join(process.resourcesPath, 'icons', iconFileName);
+    if (existsSync(packagedIcon)) {
+      return packagedIcon;
+    }
+  }
+
+  // Dev fallback
+  const devIcon = path.join(__dirname, '../../public/AppIcons/Assets.xcassets/AppIcon.appiconset/512.png');
+  if (existsSync(devIcon)) {
+    return devIcon;
+  }
+
+  // Fallback to build-resources
+  const buildIcon = path.join(__dirname, '../../build-resources/icon.ico');
+  if (existsSync(buildIcon)) {
+    return buildIcon;
+  }
+
+  return undefined;
+}
+
+// Create system tray with context menu
+function createTray() {
+  const iconPath = getTrayIconPath();
+  if (!iconPath) {
+    console.warn('[tray] No tray icon found, skipping tray creation');
+    return;
+  }
+
+  const trayIcon = nativeImage.createFromPath(iconPath);
+  // Resize for tray (16x16 on Windows, 22x22 on macOS)
+  const size = process.platform === 'win32' ? 16 : 22;
+  const resizedIcon = trayIcon.resize({ width: size, height: size });
+
+  tray = new Tray(resizedIcon);
+  tray.setToolTip('MindFlow');
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '显示 MindFlow',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) {
+            mainWindow.restore();
+          }
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createWindow();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: '退出 MindFlow',
+      click: () => {
+        app.isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+
+  tray.setContextMenu(contextMenu);
+
+  // Double-click to show window (Windows behavior)
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    icon: path.join(__dirname, '../public/AppIcons/Assets.xcassets/AppIcon.appiconset/512.png'),
+    icon: getWindowIconPath(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false, // Disable Node.js integration for security
       contextIsolation: true, // Enable context isolation for security
-      devTools: !app.isPackaged, // Disable DevTools in production builds
+      devTools: !app.isPackaged || !!process.env.MINDFLOW_DEVTOOLS, // DevTools disabled in packaged builds unless MINDFLOW_DEVTOOLS is set
     },
   });
 
@@ -75,10 +222,16 @@ function createWindow() {
 
   // On macOS, hide the window when closed instead of destroying it
   // This allows users to reopen it via the Window menu
+  // On Windows/Linux, minimize to system tray instead of quitting
   mainWindow.on('close', (event: Electron.Event) => {
-    if (process.platform === 'darwin' && !app.isQuitting) {
+    if (!app.isQuitting) {
       event.preventDefault();
-      mainWindow?.hide();
+      if (process.platform === 'darwin') {
+        mainWindow?.hide();
+      } else {
+        // Windows/Linux: minimize to tray
+        mainWindow?.hide();
+      }
     }
   });
 
@@ -168,7 +321,7 @@ function createMenu() {
           { role: 'front' as const },
           { type: 'separator' as const },
           {
-            label: 'MoodsNote',
+            label: 'MindFlow',
             accelerator: 'CmdOrCtrl+0',
             click: () => {
               if (mainWindow) {
@@ -196,20 +349,20 @@ function createMenu() {
         {
           label: 'Report an Issue',
           click: async () => {
-            await shell.openExternal('https://github.com/PStarH/MoodNotes/issues');
+            await shell.openExternal('https://github.com/PStarH/MoodsNote/issues');
           }
         },
         {
           label: 'View Documentation',
           click: async () => {
-            await shell.openExternal('https://github.com/PStarH/MoodNotes#readme');
+            await shell.openExternal('https://github.com/PStarH/MoodsNote#readme');
           }
         },
         { type: 'separator' as const },
         {
-          label: 'MoodsNote Support',
+          label: 'MindFlow Support',
           click: async () => {
-            await shell.openExternal('https://github.com/PStarH/MoodNotes');
+            await shell.openExternal('https://github.com/PStarH/MoodsNote');
           }
         }
       ]
@@ -701,9 +854,158 @@ ipcMain.handle('media:reveal', async (event, payload: { id?: string; storedName?
   }
 });
 
+
+// ---- Storage Path Management ----
+const STORAGE_CONFIG_FILE = 'mindflow-storage-config.json';
+
+function getStorageConfigPath(): string {
+  return path.join(app.getPath('userData'), STORAGE_CONFIG_FILE);
+}
+
+interface StorageConfig {
+  dataPath: string;
+}
+
+async function loadStorageConfig(): Promise<StorageConfig> {
+  const configPath = getStorageConfigPath();
+  try {
+    const raw = await fs.readFile(configPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.dataPath === 'string') {
+      return { dataPath: parsed.dataPath };
+    }
+  } catch {}
+  return { dataPath: app.getPath('userData') };
+}
+
+async function saveStorageConfig(config: StorageConfig): Promise<void> {
+  const configPath = getStorageConfigPath();
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
+}
+
+ipcMain.handle('storage:get-path', async () => {
+  try {
+    const config = await loadStorageConfig();
+    return { success: true, currentPath: config.dataPath, defaultPath: app.getPath('userData'), appPath: app.getAppPath() };
+  } catch (error: any) { return { success: false, error: error.message }; }
+});
+
+ipcMain.handle('storage:set-path', async (event: any, newPath: string) => {
+  try {
+    if (!newPath || typeof newPath !== 'string') return { success: false, error: 'Path cannot be empty' };
+    const resolvedPath = path.resolve(newPath);
+    await fs.mkdir(resolvedPath, { recursive: true });
+    const testFile = path.join(resolvedPath, '.mindflow-test');
+    await fs.writeFile(testFile, 'test', 'utf8');
+    await fs.unlink(testFile);
+    await saveStorageConfig({ dataPath: resolvedPath });
+    return { success: true, newPath: resolvedPath };
+  } catch (error: any) { return { success: false, error: error.message }; }
+});
+
+ipcMain.handle('storage:pick-folder', async () => {
+  const { dialog } = require('electron');
+  const result = await dialog.showOpenDialog(mainWindow!, { properties: ['openDirectory', 'createDirectory'], title: '\u9009\u62e9\u6570\u636e\u5b58\u50a8\u4f4d\u7f6e' });
+  if (result.canceled || result.filePaths.length === 0) return { success: false, error: 'cancelled' };
+  return { success: true, path: result.filePaths[0] };
+});
+
+// ---- Foreground App Detection / Usage Time Monitoring ----
+// 采样与累计逻辑已迁移到 ./usage-monitor（常驻 PowerShell 子进程，异步非阻塞）。
+// 此处 IPC handler 保持既有返回契约不变。
+
+ipcMain.handle('usage:get-foreground-app', async () => {
+  try {
+    const summary = usageMonitor.getLegacySummary();
+    return { success: true, currentApp: summary.currentApp, apps: summary.apps };
+  } catch (error: any) { return { success: false, error: error.message }; }
+});
+
+// 当日全量排行，契约：Array<{ app: string; exe: string; seconds: number }>，按 seconds 降序
+ipcMain.handle('usage:get-apps', async () => {
+  try {
+    return usageMonitor.getRanking();
+  } catch (error: any) { return []; }
+});
+
+ipcMain.handle('usage:reset-daily', async () => {
+  usageMonitor.resetDaily();
+  return { success: true };
+});
+
+// ---- AI 请求主进程转发 ----
+// 渲染层通过 preload 的 window.api.ai.fetch(payload) 调用。
+// 使用 Electron net.fetch：自动走系统代理，且不会携带 file:// 页面的 Origin:null 头。
+//
+// 错误约定（与渲染层保持一致）：
+// - URL 未通过白名单校验 / payload 非法 / 网络错误 / 超时：handler 抛出带 message 的 Error，
+//   invoke 的 Promise 被 reject，渲染层需用 try/catch 感知；
+// - HTTP 非 2xx：正常 resolve，返回 { ok: false, status, headers, bodyText }，由业务层判断。
+
+interface AiFetchPayload {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string;
+  timeoutMs?: number;
+}
+
+interface AiFetchResult {
+  ok: boolean;
+  status: number;
+  headers: Record<string, string>;
+  bodyText: string;
+}
+
+ipcMain.handle('ai:fetch', async (_event, payload: AiFetchPayload): Promise<AiFetchResult> => {
+  if (!payload || typeof payload.url !== 'string' || !payload.url) {
+    throw new Error('ai:fetch: invalid payload (url required)');
+  }
+
+  // URL 白名单：仅允许 https://，或 http://localhost（任意端口）
+  let parsed: URL;
+  try {
+    parsed = new URL(payload.url);
+  } catch {
+    throw new Error('ai:fetch: invalid URL');
+  }
+  const isLocalhost =
+    parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '[::1]';
+  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && isLocalhost)) {
+    throw new Error('ai:fetch: URL not allowed by whitelist');
+  }
+
+  const timeoutMs =
+    typeof payload.timeoutMs === 'number' && payload.timeoutMs > 0 ? payload.timeoutMs : 30000;
+
+  const resp = await net.fetch(payload.url, {
+    method: payload.method || 'GET',
+    headers: payload.headers,
+    body: payload.body,
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+
+  const headers: Record<string, string> = {};
+  resp.headers.forEach((value, key) => { headers[key] = value; });
+  const bodyText = await resp.text();
+
+  return { ok: resp.ok, status: resp.status, headers, bodyText };
+});
+
 app.whenReady().then(() => {
   createMenu();
+  createTray();
   createWindow();
+
+  // 使用时长监测：仅 Windows 启用（模块内部对非 win32 平台优雅跳过）
+  if (process.platform === 'win32') {
+    usageMonitor.start();
+    // 锁屏/休眠暂停采样，解锁/恢复后重新采样
+    powerMonitor.on('lock-screen', () => usageMonitor.pause());
+    powerMonitor.on('suspend', () => usageMonitor.pause());
+    powerMonitor.on('unlock-screen', () => usageMonitor.resume());
+    powerMonitor.on('resume', () => usageMonitor.resume());
+  }
 
   app.on('activate', () => {
     // On macOS, show the window if it exists but is hidden
@@ -717,7 +1019,10 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // On macOS, keep app running (dock behavior)
+  // On Windows/Linux with tray, keep app running in background
+  // Only quit if isQuitting is explicitly set (via tray menu "Exit")
+  if (process.platform !== 'darwin' && !tray) {
     app.quit();
   }
 });
@@ -725,4 +1030,6 @@ app.on('window-all-closed', () => {
 // Handle app quit properly on macOS
 app.on('before-quit', () => {
   app.isQuitting = true;
+  // 停止采样并显式 kill 常驻 PowerShell 子进程，同步落盘当日数据
+  usageMonitor.stop();
 });
