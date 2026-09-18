@@ -41,9 +41,17 @@
 
 ## Quick Start
 
-### Download (Windows)
+### Download
 
-👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)** (NSIS installer, ~87 MB — see [Releases](https://github.com/YUDongLin1/MindFlow/releases))
+👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)** (Windows NSIS installer, ~78 MB)
+
+| Platform | Artifact |
+|----------|----------|
+| Windows | `MindFlow-Setup-1.0.1-x64.exe` (installer), `MindFlow.1.0.1.exe` (portable) |
+| macOS | `MindFlow-1.0.1-universal.dmg` (Intel + Apple Silicon, unsigned — allow it in System Settings → Privacy & Security) |
+| Linux | `MindFlow-1.0.1.AppImage`, `mindflow_1.0.1_amd64.deb` |
+
+All artifacts are in [Releases](https://github.com/YUDongLin1/MindFlow/releases), built and published automatically by GitHub Actions on tag push.
 
 ### Run from source
 
