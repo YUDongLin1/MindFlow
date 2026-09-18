@@ -2,6 +2,7 @@
   "name": "mindflow",
   "version": "1.0.1",
   "description": "AI-powered personal growth journal — diary, work log, and study notes in one place with AI reviews and knowledge base",
+  "license": "AGPL-3.0",
   "author": {
     "name": "YUDongLin1",
     "url": "https://github.com/YUDongLin1"
@@ -44,7 +45,6 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
-  "dependencies": {},
   "devDependencies": {
     "@tiptap/extension-link": "^3.29.2",
     "@tiptap/extension-placeholder": "^3.29.2",
@@ -54,6 +54,7 @@
     "@tiptap/vue-3": "^3.29.2",
     "@types/dompurify": "^3.0.5",
     "@vitejs/plugin-vue": "^5.1.4",
+    "@vitest/coverage-v8": "^3.2.7",
     "@vitest/ui": "^3.2.4",
     "@vue/test-utils": "^2.4.6",
     "@vuepic/vue-datepicker": "^11.0.3",
