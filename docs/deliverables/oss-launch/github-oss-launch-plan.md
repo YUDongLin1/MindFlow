@@ -405,19 +405,24 @@ npm run test       # 必须全绿（预期 32/32）
 
 ---
 
-## 附 2：执行记录（2026-09-18 11:20 起，已实际落地）
+## 附 2：执行记录（2026-09-18 已实际落地）
 
 | 项 | 状态 | 说明 |
 |----|------|------|
-| 根目录调试残留 | ✅ 已完成 | 141 个文件（.ps1/.txt/.log/nsis-3.10.zip/proc-check.csv）移入 `_local_archive/`，未删除，可随时移回 |
-| `.gitignore` 补充 | ✅ 已完成 | 新增 AI 工作区、内部文档、构建产物、根目录残留、一次性验收测试共 5 类规则 |
-| package.json 元数据 | ✅ 已完成 | homepage / repository / bugs / author 全部指向 YUDongLin1/MindFlow |
-| git 身份 | ⏳ 待补 | `user.name=YUDongLin1` 已设置；`user.email` 待提供 GitHub noreply 地址 |
-| README 中/英 | ✅ 已完成 | 404 致谢链接→PStarH/MoodNotes；版本统一 1.0.1；新增六大求职向板块（痛点/用户/架构/AI/指标/我的职责） |
-| 上游旧 UI 截图 | ✅ 已归档 | `public/screenshots/`（8 张 MoodNotes 旧界面，README 未引用）移入 `_local_archive/` |
-| 测试 | ✅ 已收敛 | 见下 |
+| 根目录调试残留 | ✅ | 141 个文件（.ps1/.txt/.log/nsis-3.10.zip/proc-check.csv）移入 `_local_archive/`，未删除，可随时移回 |
+| `.gitignore` 补充 | ✅ | 新增 AI 工作区、内部文档、构建产物、根目录残留、一次性验收测试共 5 类规则 |
+| package.json 元数据 | ✅ | homepage / repository / bugs / author / license(AGPL-3.0) / author.email 全部补齐 |
+| git 身份 | ✅ | `user.name=YUDongLin1`，`user.email=155050346+YUDongLin1@users.noreply.github.com` |
+| README 中/英 | ✅ | 404 致谢链接→PStarH/MoodNotes；版本统一 1.0.1；新增六大求职向板块；补下载链接与 CI 徽章 |
+| 上游旧 UI 截图 | ✅ | `public/screenshots/`（8 张 MoodNotes 旧界面）移入 `_local_archive/` |
+| 测试收敛 | ✅ | 核心 5 文件 32/32 全绿，其余一次性验收测试按「只公开核心测试」决策移出公开仓库 |
+| 首次推送 | ✅ | `main -> main`，已设置 upstream tracking；HEAD = `3f58038` |
+| 仓库简介 + 标签 | ✅ | 简介 1 条 + 12 个 topics（ai / llm / local-first / privacy / prompt-engineering / vue3 / electron / pinia / typescript / echarts / journal / knowledge-management） |
+| Release v1.0.1 | ✅ | 已发布，并上传 `MindFlow-Setup-1.0.1-x64.exe`（87.2 MB） |
+| CI 全绿 | ✅ | 首次运行暴露 3 个「本地能跑、全新环境跑不了」的问题，已全部修复（见附 3） |
+| 推送后检查 | ✅ | 见附 4，全部通过 |
 
-**测试处理（用户决策：只公开核心测试）**
+### 测试处理（用户决策：只公开核心测试）
 
 - 实测：全仓库 98 个用例；核心 5 个文件 **32/32 全绿**（abTest / aiClient / analytics / journal / weeklyReport）
 - 已修复的测试侧缺陷（35 失败 → 13）：
@@ -432,10 +437,55 @@ npm run test       # 必须全绿（预期 32/32）
   - `calendar-todo.test.ts` 剩余 3 项：待办自动同步与旧待办清理逻辑
   - `document-cleanup.test.ts` 剩余 2 项：注释/字符串中的旧品牌词断言
 
-**剩余待你操作（我无法代做）**
+## 附 3：CI 首次运行暴露的 3 个问题（已修复）
 
-1. 在 GitHub 网页创建空仓库 `MindFlow`（Public，**不勾选**任何初始化选项）
-2. 提供 GitHub noreply 邮箱（Settings → Emails → Keep my email addresses private）
-3. 重拍 5 张新 UI 截图放 `docs/screenshots/`（非阻塞，README 当前不引用截图）
+> 这三个问题**本地都不会出现**，因为本地有 `electron/node_modules`、有历史安装缓存。这正是「全新克隆验证」必须做的原因。
 
-拿到 1、2 后，执行提交与推送的命令已在本文档「1.6 / 2.2 / 2.3」章节，可直接复制。
+| # | 现象 | 根因 | 修复 |
+|---|------|------|------|
+| 1 | `npm run build` 报 TS2687 / TS2717 | 全新环境没有 `electron/node_modules`，tsc 回落到根目录 `@types/node`（版本与 electron 33 的 `electron.d.ts` 不一致） | `electron/tsconfig.json` 增加 `"skipLibCheck": true` |
+| 2 | `npm run test:coverage` 失败 | `vitest.config.ts` 配了 `provider: 'v8'`，但 `@vitest/coverage-v8` 从未写进 devDependencies | `npm i -D @vitest/coverage-v8@^3.2.4` |
+| 3 | Build and Release 在 Linux 打包中断 | electron-builder 打 deb 要求 `package.json` 的 `author` 含 `email` | 补 `author.email`；同时给 matrix 加 `fail-fast: false`，单平台失败不再取消其余平台 |
+
+修复后全新目录复验：`npm install` → `npm run test:run`（32/32）→ `npm run test:coverage` → `npm run build` **全部 EXIT=0**。
+
+## 附 4：推送后检查清单结果（第 4 章）
+
+| 检查项 | 结果 |
+|--------|------|
+| README 相对链接 | 0 处失效 |
+| README 锚点目录 | 0 处失效 |
+| Mermaid 图 | 1 块，代码围栏配对完整 |
+| 敏感信息扫描 | **0 命中**（10 条规则：OpenAI Key / Bearer / ghp_ / github_pat_ / AKID / 私钥 / 手机号 / 身份证 / 内网 IP / 代理端口） |
+| 提交历史作者邮箱 | 4 个：3 个上游作者 + 本人 noreply，**无个人邮箱、无密钥、无 QQ 号** |
+| 提交历史 | 58 个提交，完整保留上游 MoodNotes 历史（AGPL-3.0 署名合规） |
+| 推送文件 | 217 个 / 4.21 MB，无调试残留、无 `_local_archive`、无 `verification-screenshots` |
+| 全新环境复现 | `C:\tmp\mf-verify` 全新解包 → install → test → coverage → build 全部通过 |
+| GitHub Actions | CI = success；Build and Release 打包三平台并回传产物 |
+
+## 附 5：剩余待你操作（我无法代做）
+
+1. **重拍 5 张新 UI 截图**放 `docs/screenshots/`，在 README 顶部加一张主图 —— 这是目前 README 最大的短板（现在只有图标，没有界面）。
+2. 复核 `docs/MiMo-Desktop-内测申请-素材.md`（已 gitignore，未推送）能否公开，能公开就把它纳入仓库作为产品材料。
+3. 仓库 Settings → General → Social preview 上传 1280×640 横图（可用 `docs/landing-preview.png` 裁切）。
+4. 个人主页 pin 该仓库。
+5. 可选：把 4 个被移出的验收测试修好后再纳入（根因已记录在附 2 下方）。
+
+### 后续更新常用命令
+
+```bash
+# 日常提交（Conventional Commits）
+git add -A
+git commit -m "feat(scope): 一句话描述"
+git push origin main
+
+# 发新版本
+git tag -a v1.0.2 -m "MindFlow v1.0.2：xxx"
+git push origin v1.0.2      # 会触发 Build and Release 自动打包三平台
+```
+
+> ⚠️ 本机 git 走 `http://127.0.0.1:63888` 代理时会吞掉凭据，推送报 `No anonymous write access`。
+> 解决：显式带上认证头推送
+> `git -c http.extraHeader="Authorization: Basic <base64(x-access-token:TOKEN)>" push origin main`
+
+**测试处理（用户决策：只公开核心测试）**
