@@ -1,0 +1,148 @@
+classDiagram
+  %% ===== AI 客户端 =====
+  class AIConfig {
+    +AIMode mode
+    +string apiKey
+    +string aiBaseUrl
+    +string aiModel
+  }
+  class AIReviewSegment {
+    +string achievements
+    +string learnings
+    +string improvements
+    +string actions
+  }
+  class ProvenanceCheck {
+    +number coverage
+    +boolean passed
+    +string checkedAt
+    +string[] failedSegments
+  }
+  class ReviewResult {
+    +AIReviewSegment draft
+    +boolean accuracyFlag
+    +string note
+    +AIMode|'local-fallback' source
+    +ProvenanceCheck provenance
+  }
+  class AIReviewService {
+    +generateReview(entry, cfg) Promise~ReviewResult~
+    -buildContext(entry) string
+    -resolveProvider(cfg) Provider
+    -callLLM(provider, ctx) Promise~RawJSON~
+    -checkProvenance(userText, segs) ProvenanceCheck
+    -fallbackLocal(entry) ReviewResult
+  }
+
+  %% ===== 埋点 =====
+  class AnalyticsEvent {
+    +AnalyticsEventName name
+    +Record~string,unknown~ props
+    +string ts
+    +string sessionId
+  }
+  class AnalyticsService {
+    +EVENTS : const
+    +track(name, props) Promise~void~
+    +activationRate() Promise~number~
+    +aiTriggerRate() Promise~void~
+    +war() Promise~number~
+    +crashRate() Promise~number~
+  }
+
+  %% ===== A/B =====
+  class ABExperiment {
+    +ExpId id
+    +string control
+    +string treatment
+    +string description
+    +AnalyticsEventName exposureEvent
+  }
+  class ABTestService {
+    +EXPERIMENTS : Record~ExpId,ABExperiment~
+    +assignVariant(expId) Variant
+    +getVariant(expId) Variant|null
+    +trackExposure(expId) Promise~void~
+  }
+
+  %% ===== 数据模型 =====
+  class JournalPrefs {
+    +AIMode aiMode
+    +string aiKey
+    +boolean e2eeEnabled
+    +string aiBaseUrl
+    +string aiModel
+  }
+  class JournalEntry {
+    +string id
+    +string date
+    +ModuleType module
+    +string mood
+    +JournalPrompt[] prompts
+    +string title
+    +string[] tags
+    +string[] links
+    +boolean reviewMark
+    +string[] wikiLinks
+    +string createdAt
+    +string updatedAt
+    +AIReview review
+  }
+  class JournalPrompt {
+    +string id
+    +string label
+    +string value
+  }
+  class AIReview {
+    +'idle'|'generated'|'adopted'|'dismissed' status
+    +AIReviewSegment draft
+    +AIMode source
+    +string generatedAt
+    +boolean accuracyFlag
+    +string note
+  }
+  class JournalStore {
+    +JournalEntry[] entries
+    +JournalPrefs prefs
+    +AuditEntry[] auditLog
+    +addEntry(payload) Promise~JournalEntry~
+    +setAIReview(payload) Promise~void~
+    +setAIMode(mode) Promise~void~
+  }
+
+  %% ===== 周报 =====
+  class WeeklyReportInput {
+    +JournalEntry[] entries
+    +string weekStart
+  }
+  class WeeklyReportOutput {
+    +string markdown
+    +number daysCovered
+    +counts : {did,stuck,next}
+    +range : {start,end}
+  }
+  class WeeklyReportService {
+    +generateWeeklyReport(input) WeeklyReportOutput
+  }
+
+  %% ===== 关系 =====
+  AIReviewService ..> AIConfig : 使用
+  AIReviewService ..> ReviewResult : 返回
+  ReviewResult *-- AIReviewSegment
+  ReviewResult *-- ProvenanceCheck
+  AIReviewService ..> JournalEntry : 读取原文
+  AIReviewService ..> AnalyticsService : 回退审计
+
+  AnalyticsService ..> AnalyticsEvent : 写入
+  ABTestService ..> ABExperiment : 定义
+  ABTestService ..> AnalyticsService : trackExposure
+
+  JournalStore o-- JournalEntry
+  JournalStore o-- JournalPrefs
+  JournalEntry *-- JournalPrompt
+  JournalEntry *-- AIReview
+  JournalStore ..> AIReviewService : setAIReview 前生成
+
+  WeeklyReportService ..> WeeklyReportInput : 入参
+  WeeklyReportService ..> WeeklyReportOutput : 返回
+  WeeklyReportService ..> JournalEntry : 聚合 WORK 条目

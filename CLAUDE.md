@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MoodNotes is a local-first journaling application built with Vue 3 + Vite and Electron. It provides mood tracking, habit insights, and data visualization with a focus on privacy and offline-first functionality. All user data is stored locally using IndexedDB (via LocalForage), and media files are stored in the system's userData directory.
+MindFlow is an AI-powered personal growth journal application built with Vue 3 + Vite and Electron. It combines diary, work log, and study notes in one place, with AI-powered reviews and an auto-generated Markdown knowledge base. MindFlow focuses on privacy and offline-first functionality — all user data is stored locally using IndexedDB (via LocalForage), and media files are stored in the system's userData directory.
 
 ## Development Commands
 
@@ -49,29 +49,26 @@ This is a **two-package architecture**:
 
 Development workflow uses `concurrently` to run both Vite dev server and Electron simultaneously.
 
-### State Management (Vuex 4)
+### State Management (Pinia)
 
-The application uses Vuex for centralized state management in [src/store/index.ts](src/store/index.ts). Key features:
+The application uses Pinia for state management in [src/stores/](src/stores/). Key features:
 
-- **Type Guards**: Runtime validation for all data types (`isDaySummary`, `isTask`, `isHabit`) to ensure data integrity
+- **Type Guards**: Runtime validation for all data types to ensure data integrity
 - **Rollback on Error**: All mutations store original state and rollback if persistence fails
 - **Data Validation**: Invalid entries are filtered out during load with console warnings
 - **Storage Limits**: 10MB limit for structured data with size checks before saving
-- **Lazy Getters**: Uses Map-based O(1) lookups for day summaries
 
 State structure:
-- `daySummaries`: Daily journal entries with mood, weather, habits, rich text content
-- `tasks`: Task list with priorities and due dates
-- `habits`: Habit tracking with historical status records
-- `sparks`: Quick inspiration notes
-- `calendarEntries`: Date-specific calendar notes
+- `journal`: Journal entries with mood, weather, habits, rich text content
+- `todo`: Todo items with priorities, dates, and scheduled future todos
 - `settings`: App settings (e.g., `autoSaveOnClose`)
+- `customModules`: User-defined journal modules
 
 ### Data Persistence
 
 **Structured Data**: LocalForage (IndexedDB wrapper) stores all state in browser storage
-- Store name: `MoodNotes`
-- Database: `mood_notes_store`
+- Store name: `mindflow`
+- Database: `mindflow_store`
 - All saves use JSON serialization/deserialization to ensure IndexedDB compatibility
 
 **Media Files** (Electron only): Stored in `app.getPath('userData')/media` via IPC handlers
@@ -102,10 +99,12 @@ The preload script exposes a secure API at `window.api` using `contextBridge`:
 ### Routing ([src/router/index.ts](src/router/index.ts))
 
 Uses Vue Router with lazy-loaded components:
-- `/` - Homepage (calendar view, quick stats, daily quote)
-- `/day-summary` - Rich text journal editor with Quill
-- `/analytics` - Data visualization (mood trends, energy/stress charts, habit insights)
-- `/settings` - App configuration and backup management
+- `/` - Homepage (daily overview, quick stats, daily quote)
+- `/growth` - Growth analytics and trends
+- `/knowledge` - Knowledge base and Q&A
+- `/calendar` - Calendar view with todo integration
+- `/privacy` - Privacy and AI mode settings
+- `/settings` - App configuration and data management
 
 ### Key Composables
 
@@ -144,7 +143,7 @@ Vue I18n setup in [src/i18n/](src/i18n/) with Chinese (zh) and English (en) loca
 - Coverage: v8 provider with HTML/JSON/text reports
 
 ### Electron Builder ([package.json](package.json) `build` section)
-- App ID: `com.pstarh.moodnotes`
+- App ID: `com.mindflow.app`
 - Output: `dist-electron/`
 - Icons in `build-resources/`
 - Platform-specific targets:

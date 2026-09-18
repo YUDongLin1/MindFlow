@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MindFlow 智流日志 — 本地优先、AI 驱动的个人成长记录中枢</title>
+<meta name="description" content="MindFlow 智流日志：日记、工作日志、学习笔记三合一，AI 复盘 + Markdown 知识库，数据 100% 本地存储。记录 → 复盘 → 沉淀，三位一体。" />
+<style>
+  :root {
+    --bg: #FBF8F3;
+    --bg-alt: #F4EEE4;
+    --card: #FFFFFF;
+    --ink: #3E3229;
+    --ink-soft: #7A6E62;
+    --ink-faint: #A89C8E;
+    --primary: #4A3B32;
+    --primary-dark: #362B24;
+    --accent: #7C8B6F;
+    --accent-light: #EAF0E3;
+    --peach: #F2A97E;
+    --lavender: #9D8FE0;
+    --line: #E9E1D4;
+    --shadow: 0 6px 24px rgba(74, 59, 50, .08);
+    --shadow-lg: 0 18px 48px rgba(74, 59, 50, .14);
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7; -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: #E5D9C5; }
+  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 88px 0; }
+  h1, h2, h3 { font-weight: 700; line-height: 1.25; }
+  .eyebrow {
+    display: inline-block; font-size: 13px; letter-spacing: .12em; font-weight: 600;
+    color: var(--accent); background: var(--accent-light); border: 1px solid #D6E0C9;
+    padding: 5px 14px; border-radius: 999px; margin-bottom: 18px;
+  }
+  .sec-title { font-size: 34px; color: var(--primary-dark); margin-bottom: 14px; }
+  .sec-sub { font-size: 16px; color: var(--ink-soft); max-width: 640px; margin: 0 auto; }
+  .center { text-align: center; }
+
+  /* ===== Nav ===== */
+  nav {
+    position: sticky; top: 0; z-index: 50; backdrop-filter: blur(12px);
+    background: rgba(251, 248, 243, .82); border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 700; color: var(--primary-dark); text-decoration: none; }
+  .brand .logo {
+    width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-size: 17px;
+    background: linear-gradient(135deg, var(--peach), var(--lavender)); box-shadow: 0 4px 12px rgba(157,143,224,.35);
+  }
+  .nav-links { display: flex; gap: 26px; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--ink-soft); font-size: 15px; transition: color .2s; }
+  .nav-links a:hover { color: var(--primary); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; font-size: 15px; font-weight: 600;
+    padding: 11px 24px; text-decoration: none; transition: all .22s ease; cursor: pointer; border: none;
+  }
+  .btn-primary { background: var(--primary); color: #FFF9F0; box-shadow: 0 6px 18px rgba(54,43,36,.28); }
+  .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(54,43,36,.34); }
+  .btn-ghost { background: var(--card); color: var(--primary); border: 1.5px solid var(--line); }
+  .btn-ghost:hover { border-color: var(--ink-faint); transform: translateY(-2px); }
+  .btn-nav { padding: 8px 18px; font-size: 14px; }
+
+  /* ===== Hero ===== */
+  .hero { position: relative; padding: 96px 0 60px; overflow: hidden; }
+  .hero::before, .hero::after {
+    content: ""; position: absolute; border-radius: 50%; filter: blur(80px); opacity: .5; z-index: 0;
+  }
+  .hero::before { width: 420px; height: 420px; background: #F6D9C2; top: -120px; right: -80px; }
+  .hero::after { width: 380px; height: 380px; background: #DCD5F2; bottom: -160px; left: -100px; }
+  .hero .wrap { position: relative; z-index: 1; }
+  .hero-inner { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+  .hero h1 { font-size: 46px; color: var(--primary-dark); margin-bottom: 20px; letter-spacing: -.01em; }
+  .hero h1 .grad {
+    background: linear-gradient(92deg, var(--peach) 10%, var(--lavender) 90%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero p.lead { font-size: 17px; color: var(--ink-soft); margin-bottom: 28px; max-width: 520px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+  .badge {
+    font-size: 12.5px; font-weight: 600; color: var(--ink-soft); background: var(--card);
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .badge b { color: var(--accent); }
+  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-note { margin-top: 16px; font-size: 13px; color: var(--ink-faint); }
+
+  /* hero mock window */
+  .mock {
+    background: var(--card); border-radius: 20px; box-shadow: var(--shadow-lg); border: 1px solid var(--line);
+    overflow: hidden; transform: rotate(1.2deg); transition: transform .4s ease;
+  }
+  .mock:hover { transform: rotate(0deg) translateY(-4px); }
+  .mock-bar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; background: var(--bg-alt); border-bottom: 1px solid var(--line); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .mock-body { display: grid; grid-template-columns: 118px 1fr; min-height: 320px; }
+  .mock-side { background: #FBF7F0; border-right: 1px solid var(--line); padding: 14px 10px; font-size: 12.5px; }
+  .mock-side .mi { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 9px; color: var(--ink-soft); margin-bottom: 3px; }
+  .mock-side .mi.on { background: var(--primary); color: #FFF6EA; font-weight: 600; }
+  .mock-main { padding: 18px 20px; }
+  .mock-greet { font-size: 13px; color: var(--ink-faint); letter-spacing: .06em; }
+  .mock-title { font-size: 19px; font-weight: 700; color: var(--primary-dark); margin: 2px 0 14px; }
+  .m-card { background: var(--bg); border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; margin-bottom: 10px; }
+  .m-card .lbl { font-size: 10.5px; letter-spacing: .1em; color: var(--ink-faint); font-weight: 700; }
+  .m-row { display: flex; gap: 10px; }
+  .m-row .m-card { flex: 1; }
+  .spark { font-size: 13px; color: var(--ink); }
+  .pill { display: inline-block; font-size: 11px; background: var(--accent-light); color: var(--accent); border-radius: 999px; padding: 2px 9px; font-weight: 600; margin-right: 5px; margin-top: 6px; }
+  .ai-line { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--ink-soft); }
+  .ai-ic { flex: none; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--peach), var(--lavender)); display: grid; place-items: center; color: #fff; font-size: 11px; }
+
+  /* ===== Loop (记录→复盘→沉淀) ===== */
+  .loop { background: var(--primary-dark); color: #F5EDE2; border-radius: 28px; padding: 56px 44px; }
+  .loop h2 { font-size: 30px; margin-bottom: 10px; color: #FFF8EE; }
+  .loop p { color: #C9BBA9; max-width: 560px; }
+  .loop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 40px; position: relative; }
+  .loop-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); padding: 26px 24px; transition: all .25s; }
+  .loop-card:hover { background: rgba(255,255,255,.1); transform: translateY(-4px); }
+  .loop-num { font-size: 12px; letter-spacing: .18em; color: var(--peach); font-weight: 700; margin-bottom: 12px; }
+  .loop-card h3 { font-size: 19px; color: #FFF6EA; margin-bottom: 8px; }
+  .loop-card p { font-size: 14px; color: #BFB09C; margin: 0; }
+  .loop-ic { font-size: 24px; margin-bottom: 10px; }
+
+  /* ===== Features grid ===== */
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 48px; }
+  .feat {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 26px;
+    box-shadow: var(--shadow); transition: all .25s ease; position: relative; overflow: hidden;
+  }
+  .feat:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+  .feat::after {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; opacity: 0; transition: opacity .25s;
+    background: linear-gradient(90deg, var(--peach), var(--lavender));
+  }
+  .feat:hover::after { opacity: 1; }
+  .feat-ic {
+    width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; font-size: 22px; margin-bottom: 18px;
+  }
+  .ic-a { background: #FCEBDD; } .ic-b { background: var(--accent-light); } .ic-c { background: #ECE8F8; }
+  .ic-d { background: #FBE3E0; } .ic-e { background: #E3F0F2; } .ic-f { background: #FBF3D2; }
+  .feat h3 { font-size: 18px; color: var(--primary-dark); margin-bottom: 8px; }
+  .feat p { font-size: 14px; color: var(--ink-soft); }
+  .feat .tags { margin-top: 14px; }
+  .tag { display: inline-block; font-size: 11.5px; background: var(--bg-alt); color: var(--ink-soft); border-radius: 999px; padding: 3px 10px; margin: 3px 3px 0 0; }
+
+  /* ===== AI section ===== */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .split.rev .split-txt { order: 2; }
+  .split-txt h2 { font-size: 32px; color: var(--primary-dark); margin-bottom: 16px; }
+  .split-txt > p { color: var(--ink-soft); margin-bottom: 24px; font-size: 15.5px; }
+  .chk { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .chk .ci {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: grid; place-items: center; font-size: 12px; margin-top: 3px;
+  }
+  .chk b { color: var(--primary-dark); }
+  .chk p { font-size: 14px; color: var(--ink-soft); }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow-lg); padding: 26px; }
+  .panel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .panel-head .ai-ic { width: 30px; height: 30px; border-radius: 9px; font-size: 15px; }
+  .panel-head b { font-size: 15px; color: var(--primary-dark); }
+  .panel-head .sub { font-size: 12px; color: var(--ink-faint); }
+  .step { display: flex; gap: 12px; padding: 11px 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); margin-bottom: 9px; font-size: 13.5px; }
+  .step .no { flex: none; width: 24px; height: 24px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--accent); }
+  .step b { color: var(--primary-dark); }
+  .draft-note { margin-top: 12px; font-size: 12px; color: var(--ink-faint); text-align: center; }
+  .draft-note em { font-style: normal; background: #FBF3D2; color: #9A7B2F; border-radius: 6px; padding: 1px 7px; font-weight: 600; }
+
+  /* modes */
+  .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 40px; }
+  .mode { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; text-align: left; }
+  .mode .m-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .mode b { font-size: 16px; color: var(--primary-dark); }
+  .mode .m-tag { font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 10px; }
+  .t-green { background: var(--accent-light); color: var(--accent); }
+  .t-blue { background: #E3F0F2; color: #4E7E88; }
+  .t-purple { background: #ECE8F8; color: #6F61B8; }
+  .mode p { font-size: 13.5px; color: var(--ink-soft); }
+
+  /* ===== Privacy ===== */
+  .privacy-band { background: linear-gradient(135deg, #EFE8DA, #F4EEE4); border: 1px solid var(--line); border-radius: 28px; padding: 56px 48px; }
+  .privacy-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+  .shield { width: 92px; height: 92px; border-radius: 26px; background: var(--primary-dark); display: grid; place-items: center; margin: 0 auto 20px; box-shadow: var(--shadow-lg); }
+  .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; text-align: center; }
+  .stat .v { font-size: 26px; font-weight: 800; color: var(--primary-dark); }
+  .stat .k { font-size: 12.5px; color: var(--ink-faint); margin-top: 2px; }
+
+  /* ===== Shortcuts ===== */
+  .kbd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 40px; }
+  .kbd-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; align-items: center; gap: 12px; }
+  kbd {
+    font-family: inherit; font-size: 12px; font-weight: 700; background: var(--bg-alt); color: var(--primary);
+    border: 1px solid var(--line); border-bottom-width: 2.5px; border-radius: 7px; padding: 4px 8px; white-space: nowrap;
+  }
+  .kbd-card span { font-size: 13px; color: var(--ink-soft); }
+
+  /* ===== CTA / Footer ===== */
+  .cta-band { text-align: center; padding: 90px 0 100px; }
+  .cta-band h2 { font-size: 38px; color: var(--primary-dark); margin-bottom: 14px; }
+  .cta-band p { color: var(--ink-soft); margin-bottom: 32px; }
+  .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .platforms { margin-top: 22px; font-size: 13px; color: var(--ink-faint); }
+  footer { border-top: 1px solid var(--line); padding: 30px 0; background: var(--bg-alt); }
+  .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--ink-faint); }
+  .foot a { color: var(--ink-soft); text-decoration: none; margin-left: 18px; }
+  .foot a:hover { color: var(--primary); }
+
+  /* reveal animation */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .hero-inner, .split, .privacy-grid { grid-template-columns: 1fr; }
+    .split.rev .split-txt { order: 0; }
+    .feat-grid, .kbd-grid { grid-template-columns: repeat(2, 1fr); }
+    .loop-grid, .modes { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 34px; }
+    .nav-links a:not(.btn) { display: none; }
+    .mock { transform: none; }
+  }
+  @media (max-width: 560px) {
+    .feat-grid, .kbd-grid { grid-template-columns: 1fr; }
+    section { padding: 64px 0; }
+    .loop, .privacy-band { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="logo">✦</span> MindFlow <span style="font-weight:400;color:var(--ink-faint);font-size:14px;">智流日志</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">核心功能</a>
+      <a href="#ai">AI 复盘</a>
+      <a href="#privacy">隐私</a>
+      <a href="#keys">快捷键</a>
+      <a href="#download" class="btn btn-primary btn-nav">免费下载</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="eyebrow">🌿 本地优先 · AI 驱动 · 隐私至上</span>
+      <h1>让每一天的记录，<br />都成为<span class="grad">成长的沉淀</span></h1>
+      <p class="lead">
+        MindFlow 智流日志是一款日记、工作日志、学习笔记三合一的个人成长记录中枢。
+        AI 帮你复盘，知识库帮你沉淀，数据 100% 留在本地——不上传、不训练。
+      </p>
+      <div class="badges">
+        <span class="badge"><b>●</b> 离线可用</span>
+        <span class="badge"><b>●</b> 开源 AGPL-3.0</span>
+        <span class="badge"><b>●</b> Windows / macOS / Linux</span>
+        <span class="badge"><b>●</b> 语音输入</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#download" class="btn btn-primary">⬇ 立即下载 MindFlow 1.0.0</a>
+        <a href="#features" class="btn btn-ghost">了解功能 →</a>
+      </div>
+      <div class="hero-note">基于 Vue 3 + Vite + Electron 构建 · 源自开源项目 MindFlow</div>
+    </div>
+
+    <div class="mock" aria-hidden="true">
+      <div class="mock-bar">
+        <span class="dot" style="background:#E8A79A"></span>
+        <span class="dot" style="background:#E9C98F"></span>
+        <span class="dot" style="background:#A8BF97"></span>
+        <span style="margin-left:10px;font-size:12px;color:var(--ink-faint)">MindFlow — 今日</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="mi on">☀ 今日</div>
+          <div class="mi">📈 成长</div>
+          <div class="mi">📚 知识库</div>
+          <div class="mi">📅 日历</div>
+          <div class="mi">🔒 隐私</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-greet">8月6日 · 星期四 · ⛅ 多云 26°C</div>
+          <div class="mock-title">下午好，朋友 🖐️</div>
+          <div class="m-row">
+            <div class="m-card">
+              <div class="lbl">今日心情</div>
+              <div class="spark">😊 平静 · 精力 7/10</div>
+            </div>
+            <div class="m-card">
+              <div class="lbl">待办</div>
+              <div class="spark">✓ 2 / 5 已完成</div>
+            </div>
+          </div>
+          <div class="m-card">
+            <div class="lbl">✨ 今日记录 · 学习笔记</div>
+            <div class="spark" style="margin-top:5px">读完了《心流》第三章，专注的关键是明确的目标与即时反馈……</div>
+            <span class="pill">#阅读</span><span class="pill">#心流</span><span class="pill">#专注力</span>
+          </div>
+          <div class="m-card">
+            <div class="ai-line">
+              <span class="ai-ic">✦</span>
+              <span><b style="color:var(--primary-dark)">AI 复盘草稿</b>（待你确认）：今天建立了「先目标后动笔」的写作习惯，建议明天用 25 分钟番茄钟验证效果。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= LOOP ================= -->
+<section style="padding-top:40px">
+  <div class="wrap reveal">
+    <div class="loop">
+      <span class="eyebrow" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:var(--peach)">产品理念</span>
+      <h2>记录 · 复盘 · 沉淀，三位一体</h2>
+      <p>MindFlow 不只是一个记录工具，而是一套完整的成长闭环：写下当下、AI 帮你回看、知识自动沉淀为可复用的资产。</p>
+      <div class="loop-grid">
+        <div class="loop-card">
+          <div class="loop-ic">✍️</div>
+          <div class="loop-num">STEP 01</div>
+          <h3>记录</h3>
+          <p>日记三问、工作三字段、学习三维度模板引导，富文本 + 语音输入，时间、位置、天气自动留痕。</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-ic">🔍</div>
+          <div class="loop-num">STEP 02</div>
+          <h3>复盘</h3>
+          <p>AI 四段式结构化复盘——成果 / 收获 / 改进 / 行动，溯源校验防幻觉，采纳与否由你决定。</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-ic">🌱</div>
+          <div class="loop-num">STEP 03</div>
+          <h3>沉淀</h3>
+          <p>每条记录自动生成 Markdown 知识条目，双链互联，日积月累汇成属于你自己的知识图谱。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section id="features">
+  <div class="wrap center">
+    <span class="eyebrow">核心功能</span>
+    <h2 class="sec-title">一个应用，六种记录方式</h2>
+    <p class="sec-sub">从灵光一现到深度复盘，MindFlow 覆盖个人成长记录的每一个场景。</p>
+
+    <div class="feat-grid" style="text-align:left">
+      <div class="feat reveal">
+        <div class="feat-ic ic-a">📝</div>
+        <h3>三模块记录</h3>
+        <p>日记 / 工作日志 / 学习笔记三种模板各有引导，Tiptap 富文本编辑器支持富文本与纯文本一键切换，还支持自定义记录模块。</p>
+        <div class="tags"><span class="tag">日记三问</span><span class="tag">工作三字段</span><span class="tag">学习三维度</span></div>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-ic ic-b">🎙️</div>
+        <h3>语音输入与智能标签</h3>
+        <p>开口即记录，Web Speech API 中文语音识别；TF-IDF 分词驱动的智能标签推荐，让每条记录自动归类。</p>
+        <div class="tags"><span class="tag">中文识别</span><span class="tag">TF-IDF</span><span class="tag">自动元信息</span></div>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-ic ic-c">📊</div>
+        <h3>追踪与可视化</h3>
+        <p>心情 / 精力 / 压力三维追踪，ECharts 交互式图表呈现趋势；每日待办同步显示于成长页与日历页。</p>
+        <div class="tags"><span class="tag">心情曲线</span><span class="tag">精力分布</span><span class="tag">压力监测</span></div>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-ic ic-d">📅</div>
+        <h3>日历与总结</h3>
+        <p>日历月视图浏览历史足迹，每日总结卡片一眼回看；「去年今日」让过去的自己与现在的你对话。</p>
+        <div class="tags"><span class="tag">月视图</span><span class="tag">每日总结</span><span class="tag">去年今日</span></div>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-ic ic-e">🕸️</div>
+        <h3>Markdown 知识库</h3>
+        <p>每条记录自动生成带 frontmatter 与双链 <code>[[ ]]</code> 的 Markdown 文件，按年月组织；Canvas 力导向知识图谱、SM-2 间隔重复复习、全文检索与 AI 问答。</p>
+        <div class="tags"><span class="tag">双链</span><span class="tag">知识图谱</span><span class="tag">间隔重复</span></div>
+      </div>
+      <div class="feat reveal">
+        <div class="feat-ic ic-f">🔄</div>
+        <h3>导入导出与备份</h3>
+        <p>一键导出 JSON 完整备份 / CSV / Markdown；导入支持 5 种格式（JSON / TXT / CSV / Markdown / HTML），自动识别内容并做冲突预检。</p>
+        <div class="tags"><span class="tag">5 种导入格式</span><span class="tag">冲突预检</span><span class="tag">存储可配置</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= AI REVIEW ================= -->
+<section id="ai" style="background:var(--bg-alt)">
+  <div class="wrap">
+    <div class="split reveal">
+      <div class="split-txt">
+        <span class="eyebrow">AI 复盘</span>
+        <h2>不止是记录，<br />更是你的私人复盘教练</h2>
+        <p>按下 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd>，AI 即刻阅读你的记录，产出结构化的复盘草稿——但所有结论都要经你确认才会生效。</p>
+        <div class="chk"><span class="ci">✓</span><div><b>四段式结构</b><p>成果 / 收获 / 改进 / 行动，复盘不再流于形式</p></div></div>
+        <div class="chk"><span class="ci">✓</span><div><b>溯源校验防幻觉</b><p>每条结论可追溯到原文依据，拒绝凭空生成</p></div></div>
+        <div class="chk"><span class="ci">✓</span><div><b>三态管理 + 审计日志</b><p>采纳 / 丢弃 / 还原自由切换，全程留痕可查</p></div></div>
+        <div class="chk"><span class="ci">✓</span><div><b>12 秒超时保护</b><p>连接测试与生成均有超时兜底，绝不卡死流程</p></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="ai-ic">✦</span>
+          <div><b>AI 复盘 · 学习三维度</b><br /><span class="sub">本地镜像模式 · 已溯源 4 条依据</span></div>
+        </div>
+        <div class="step"><span class="no">1</span><div><b>成果</b>：完成《心流》第三章阅读笔记，提炼出「目标 + 反馈」公式</div></div>
+        <div class="step"><span class="no">2</span><div><b>收获</b>：意识到拖延源于目标模糊，而非意志力不足</div></div>
+        <div class="step"><span class="no">3</span><div><b>改进</b>：写作前先写下 3 个明确的小目标</div></div>
+        <div class="step"><span class="no">4</span><div><b>行动</b>：明早用番茄钟验证「先目标后动笔」流程</div></div>
+        <div class="draft-note">状态：<em>草稿 · 需你确认</em>　采纳 ／ 丢弃 ／ 还原</div>
+      </div>
+    </div>
+
+    <div class="modes reveal">
+      <div class="mode">
+        <div class="m-head"><b>🏠 本地镜像</b><span class="m-tag t-green">零网络</span></div>
+        <p>完全离线运行的本地模型通道，数据不出设备一步，隐私极致。</p>
+      </div>
+      <div class="mode">
+        <div class="m-head"><b>🔑 自带 Key</b><span class="m-tag t-blue">OpenAI 兼容 + Ollama</span></div>
+        <p>接入你自己的模型服务，支持 OpenAI 兼容 API 与本地 Ollama，灵活自由。</p>
+      </div>
+      <div class="mode">
+        <div class="m-head"><b>☁️ 云端模式</b><span class="m-tag t-purple">开箱即用</span></div>
+        <p>无需配置即可体验 AI 复盘，主进程转发请求，白名单校验保障安全。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVACY ================= -->
+<section id="privacy">
+  <div class="wrap reveal">
+    <div class="privacy-band">
+      <div class="privacy-grid">
+        <div>
+          <span class="eyebrow">数据与隐私</span>
+          <h2 class="sec-title" style="text-align:left;margin-top:14px">你的数据，只属于你</h2>
+          <p style="color:var(--ink-soft);font-size:15.5px">
+            MindFlow 坚持 <b style="color:var(--primary-dark)">Local-First（本地优先）</b> 设计：所有记录存储在本地 IndexedDB，离线也能完整使用；
+            存储位置可自由配置。AI 请求经主进程安全转发并做 URL 白名单校验。你的回忆，不会被上传、不会被训练。
+          </p>
+        </div>
+        <div>
+          <div class="shield">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F2A97E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="v">100%</div><div class="k">数据本地存储</div></div>
+            <div class="stat"><div class="v">0</div><div class="k">上传 / 训练行为</div></div>
+            <div class="stat"><div class="v">5 种</div><div class="k">导入格式自动识别</div></div>
+            <div class="stat"><div class="v">3 种</div><div class="k">导出格式随时备份</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SHORTCUTS ================= -->
+<section id="keys" style="padding-top:20px">
+  <div class="wrap center">
+    <span class="eyebrow">效率体验</span>
+    <h2 class="sec-title">快捷键在手，记录不愁</h2>
+    <p class="sec-sub">桌面级效率体验，常用操作一键直达。还有桌面宠物（猫 / 狗 / 植物 + 自定义上传）静静陪伴你的每一次记录。</p>
+    <div class="kbd-grid" style="text-align:left">
+      <div class="kbd-card reveal"><kbd>Ctrl + N</kbd><span>新建记录</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + S</kbd><span>保存当前记录</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + F</kbd><span>全局搜索</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + E</kbd><span>切换富文本 / 纯文本</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + ⇧ + A</kbd><span>触发 AI 复盘</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + L</kbd><span>插入双链 [[ ]]</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + D</kbd><span>插入当前日期</span></div>
+      <div class="kbd-card reveal"><kbd>Ctrl + ,</kbd><span>打开设置</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="cta-band" id="download">
+  <div class="wrap reveal">
+    <span class="eyebrow">开始使用</span>
+    <h2>今天，就开始你的智流</h2>
+    <p>开源免费 · AGPL-3.0 · 无账号 · 无订阅 · 无广告</p>
+    <div class="cta-btns">
+      <a href="#" class="btn btn-primary">⬇ Windows 安装版 (Setup.exe)</a>
+      <a href="#" class="btn btn-ghost">📦 Windows 便携版</a>
+      <a href="https://github.com" class="btn btn-ghost">⭐ GitHub 源码</a>
+    </div>
+    <div class="platforms">支持 Windows 10+ / macOS / Linux · Node.js 18+ 可从源码构建 · npm run dev 即可本地体验</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 MindFlow 智流日志 · AGPL-3.0 · 基于 MindFlow 二次开发</span>
+    <span>
+      <a href="#features">功能</a><a href="#ai">AI 复盘</a><a href="#privacy">隐私</a><a href="#top">回到顶部 ↑</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  // 滚动渐显动画
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

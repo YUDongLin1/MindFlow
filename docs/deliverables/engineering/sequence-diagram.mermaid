@@ -1,0 +1,64 @@
+sequenceDiagram
+  %% ===== 图1：AI 复盘链路 =====
+  participant U as 用户
+  participant M as AIReviewMirror.vue
+  participant S as store/journal
+  participant C as aiClient.generateReview
+  participant P as resolveProvider
+  participant LLM as 真实模型(byok/ollama/cloud)
+  participant PV as checkProvenance
+  participant A as analytics
+
+  U->>M: 点击「生成复盘」
+  M->>A: track(ai_review_triggered,{variant_B,exp3})
+  M->>S: 读取 prefs(aiMode,aiKey,aiBaseUrl,aiModel)
+  M->>C: generateReview(entry, cfg)
+  C->>C: buildContext(entry) 三段原文拼装
+  C->>P: resolveProvider(cfg)
+  alt mode = local
+    C-->>M: 本地镜像 ReviewResult(accuracyFlag=true)
+  else mode = byok / ollama / cloud
+    C->>LLM: fetch(chat/completions, sysPrompt+context)
+    alt 成功且解析 JSON
+      LLM-->>C: {achievements,learnings,improvements,actions,accuracyFlag}
+      C->>PV: checkProvenance(userText, segments)
+      PV-->>C: {coverage,passed,failedSegments}
+      C->>C: 模型报true但!passed → accuracyFlag=false & 审计
+      C-->>M: ReviewResult(accuracyFlag, provenance)
+    else 网络/解析失败
+      C->>C: fallbackLocal(entry)
+      C-->>M: ReviewResult(source='local-fallback', accuracyFlag=true)
+      C->>A: track(ai_client_fallback)
+    end
+  end
+  M->>A: track(ai_review_generated,{variant_B,accuracy_flag})
+  M->>S: setAIReview(entryId, review)
+  U->>M: 采纳/丢弃/编辑/还原
+  M->>A: track(ai_review_adopted|dismissed|edited|restored_original)
+
+  %% ===== 图2：A/B 分配与曝光 =====
+  Note over M,S: 另序列（启动与首次曝光）
+  participant App as App.vue
+  participant AB as abTest
+  App->>AB: assignVariant(exp3_default) @首次启动
+  App->>AB: assignVariant(exp1_privacy) @首次启动
+  Note over M: 用户展开复盘区
+  M->>AB: getVariant(exp1_privacy)
+  AB-->>M: control|treatment
+  M->>A: trackExposure(exp1_privacy) → ai_review_exposure{variant}
+  M->>AB: getVariant(exp3_default)
+  alt treatment(auto_inject)
+    M->>M: 自动预填草稿（仍标需确认）
+  end
+  M->>AB: assignVariant(exp2_quote) @首次生成
+  M->>A: trackExposure(exp2_quote) → ai_review_generated{variant_B}
+
+  %% ===== 图3：周报聚合（M2 P1-1） =====
+  participant G as Growth.vue
+  participant W as weeklyReport
+  participant MD as markdownExport
+  G->>W: generateWeeklyReport({entries:本周WORK, weekStart})
+  W->>W: 按日聚合 did/stuck/next → markdown
+  W-->>G: WeeklyReportOutput
+  G->>A: track(weekly_review_generated)
+  G->>MD: downloadMarkdown/copyMarkdown(content)
