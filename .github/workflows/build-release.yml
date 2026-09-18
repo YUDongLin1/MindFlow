@@ -37,9 +37,11 @@ jobs:
       - name: Build Electron app
         run: npm run build
 
+      # 上方已执行 npm run build（含 vite build 与 electron 编译），此处仅打包，避免重复构建
+      # 注：mac 仅产出 dmg；mas target 需签名凭据后方可启用，暂未加入
       - name: Package Electron app (macOS)
         if: matrix.os == 'macos-latest'
-        run: npm run package:mac
+        run: npx electron-builder --mac
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -62,7 +64,6 @@ jobs:
           name: macos-builds
           path: |
             dist-electron/*.dmg
-            dist-electron/*.zip
 
       - name: Upload artifacts (Windows)
         if: matrix.os == 'windows-latest'
