@@ -11,18 +11,139 @@ export default {
     loading: 'Loading...',
     search: 'Search',
     filter: 'Filter',
-    sort: 'Sort'
+    sort: 'Sort',
+    noData: 'No data',
+    today: 'Today',
+    yesterday: 'Yesterday',
+    thisWeek: 'This Week',
+    thisMonth: 'This Month',
+    todo: 'Todo',
+    dailySummary: 'Daily Summary',
+    metaLocation: 'Location',
+    metaWeather: 'Weather',
+    metaTime: 'Time',
+    more: 'more'
   },
 
   // Navigation
   nav: {
     home: 'Home',
-    analytics: 'Analytics',
+    today: 'Today',
+    growth: 'Growth',
+    knowledge: 'Knowledge',
+    privacy: 'Privacy',
     calendar: 'Calendar',
+    analytics: 'Analytics',
     habits: 'Habits',
     search: 'Search',
     backup: 'Backup',
     settings: 'Settings'
+  },
+
+  // Sidebar
+  sidebar: {
+    subtitle: 'Personal Growth Hub',
+    dataLocal: 'All data stays local',
+    localFirst: 'Local-first',
+    account: 'Account',
+    accountHint: 'Sign in to sync your data across devices via cloud',
+    login: 'Sign In / Register',
+    logout: 'Sign Out',
+    privacyNote: 'Local data is not uploaded automatically — sync requires manual opt-in',
+    cloudSync: 'Cloud Sync',
+    active: 'Active',
+    offline: 'Offline'
+  },
+
+  // Theme
+  theme: {
+    switchToLight: 'Switch to light',
+    switchToDark: 'Switch to dark'
+  },
+
+  // Calendar view
+  calendarView: {
+    title: 'Calendar',
+    subtitle: 'Browse your entries and reviews by date',
+    noRecords: 'No entries on this day',
+    recordsCount: '{count} entries',
+    diary: 'Diary',
+    work: 'Work',
+    study: 'Study',
+    aiReview: 'AI Review',
+    prevMonth: 'Previous month',
+    nextMonth: 'Next month',
+    today: 'Today',
+    monthStats: 'Monthly Stats',
+    totalEntries: 'Total Entries',
+    diaryCount: 'Diary',
+    workCount: 'Work',
+    studyCount: 'Study',
+    addScheduledTodo: 'Add Scheduled Todo',
+    targetDate: 'Target Date',
+    targetDateHint: 'When the date arrives, the todo will automatically appear in today\'s list',
+    scheduledTodos: 'Scheduled',
+    noTodos: 'No todos yet'
+  },
+
+  // Knowledge QA
+  knowledgeQA: {
+    title: 'Ask Your Knowledge Base',
+    placeholder: 'Type your question…',
+    askBtn: 'Ask',
+    searching: 'Searching knowledge base…',
+    noResults: 'No relevant entries found. Try a different question.',
+    relatedEntries: 'Related Entries',
+    aiAnswer: 'AI Answer',
+    aiUnavailable: 'AI service unavailable. Showing keyword matches.',
+    askHint: 'Intelligent Q&A based on all your entries'
+  },
+
+  // Importer
+  importer: {
+    title: 'Import Data',
+    subtitle: 'Import data losslessly from WeChat Memo, Apple Notes, Notion, etc.',
+    startBtn: 'Start Import',
+    dragHint: 'Drop file here, or click to select',
+    supportedFormats: 'Supported: JSON (MindFlow/MindFlow backup), TXT (WeChat Memo/Notes), CSV/Markdown (Notion export)',
+    total: 'Total',
+    newItems: 'New',
+    conflicts: 'Conflicts',
+    parsing: 'Parsing…',
+    conflictWarning: '{count} conflicts found (same date + module already exists)',
+    skipConflicts: 'Skip Conflicts',
+    overwrite: 'Overwrite',
+    merge: 'Append',
+    keepExisting: 'Keep existing',
+    replaceWith: 'Replace with imported',
+    keepBoth: 'Keep both',
+    preview: 'Preview (first 10)',
+    moreEntries: '{count} more…',
+    reselect: 'Reselect',
+    confirmImport: 'Import {count} entries',
+    importing: 'Importing…',
+    importDone: 'Import Complete',
+    importedSuccess: '{count} imported, {skipped} skipped',
+    errorsCount: ', {count} failed',
+    continueImport: 'Continue Import',
+    done: 'Done',
+    jsonBackup: 'JSON Backup',
+    wechatMemo: 'WeChat Memo',
+    appleNotes: 'Apple Notes',
+    notionCsv: 'Notion (CSV)',
+    notionMd: 'Notion (Markdown)',
+    autoDetect: 'Auto Detect',
+    tags: 'Tags'
+  },
+
+  // Privacy shorthand
+  privacy: {
+    localMirror: 'Local Mirror',
+    localMirrorDesc: 'All data processed locally, no network needed',
+    bringKey: 'BYOK',
+    bringKeyDesc: 'Use your own OpenAI-compatible API key',
+    cloud: 'Cloud',
+    cloudDesc: 'Use cloud subscription model service'
   },
 
   // Calendar
@@ -419,7 +540,7 @@ export default {
   // Settings
   settings: {
     title: 'Settings',
-    subtitle: 'Customize your MoodsNote experience',
+    subtitle: 'Customize your MindFlow experience',
     theme: 'Theme',
     themeDesc: 'Choose your preferred color scheme',
     themeOptions: {
@@ -461,14 +582,29 @@ export default {
     noQuotesYet: 'No custom quotes yet. Add your first inspirational quote!',
     quoteStats: 'Quote Bank Statistics',
     customQuotesInLibrary: 'Custom Quotes in Library',
-    about: 'About MoodsNote',
+    about: 'About MindFlow',
     version: 'Version',
     build: 'Build',
-    aboutDesc: 'MoodsNote is your personal journaling companion, designed to help you track your mood, habits, and memories with beautiful visualizations and insights.',
+    aboutDesc: 'MindFlow is a local-first, AI-powered personal growth journal: diary, work log and study notes in one place, with AI reviews and an auto-generated Markdown knowledge base. Your data stays 100% on your device.',
     english: 'English',
     defaultLanguage: 'Default language',
     chinese: '中文',
-    simplifiedChinese: '简体中文'
+    simplifiedChinese: '简体中文',
+    aiMode: 'AI Mode',
+    dataManager: 'Data Management',
+    dataManagerDesc: 'Export full backups or import history — your data belongs to you',
+    exportData: 'Export Data',
+    exportJson: 'JSON Full Backup',
+    exportJsonDesc: 'All entries & settings, re-importable',
+    exportCsv: 'CSV Spreadsheet',
+    exportCsvDesc: 'For Excel analysis',
+    exportMarkdownAll: 'Markdown Knowledge Base',
+    exportMarkdownAllDesc: 'Single-file export, Obsidian-ready',
+    importData: 'Import Data',
+    importDataDesc: 'Lossless import from WeChat Memo, Notes, Notion, etc.',
+    startImport: 'Start Import',
+    exporting: 'Exporting…',
+    entriesCount: '{count} entries in total'
   },
 
   // Day Summary

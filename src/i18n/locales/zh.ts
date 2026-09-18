@@ -11,18 +11,139 @@ export default {
     loading: '加载中，请稍候…',
     search: '搜索',
     filter: '筛选',
-    sort: '排序'
+    sort: '排序',
+    noData: '暂无数据',
+    today: '今天',
+    yesterday: '昨天',
+    thisWeek: '本周',
+    thisMonth: '本月',
+    todo: '待办',
+    dailySummary: '每日总结',
+    metaLocation: '位置',
+    metaWeather: '天气',
+    metaTime: '时间',
+    more: '更多'
   },
 
   // 导航
   nav: {
     home: '首页',
-    analytics: '洞察',
+    today: '今日',
+    growth: '成长',
+    knowledge: '知识库',
+    privacy: '隐私',
     calendar: '日历',
+    analytics: '洞察',
     habits: '习惯',
     search: '搜索',
     backup: '备份',
     settings: '设置'
+  },
+
+  // 侧边栏
+  sidebar: {
+    subtitle: '个人成长记录中枢',
+    dataLocal: '数据全在本机',
+    localFirst: '本地优先',
+    account: '账号',
+    accountHint: '登录后可同步数据到云端，实现多设备同步',
+    login: '登录 / 注册',
+    logout: '退出登录',
+    privacyNote: '本地数据不会自动上传，需手动开启同步',
+    cloudSync: '云端同步',
+    active: '已开启',
+    offline: '本地模式'
+  },
+
+  // 主题切换
+  theme: {
+    switchToLight: '切换到浅色',
+    switchToDark: '切换到深色'
+  },
+
+  // 日历视图
+  calendarView: {
+    title: '日历',
+    subtitle: '按日期浏览你的记录与复盘',
+    noRecords: '这一天还没有记录',
+    recordsCount: '{count} 条记录',
+    diary: '日记',
+    work: '工作',
+    study: '学习',
+    aiReview: 'AI 复盘',
+    prevMonth: '上个月',
+    nextMonth: '下个月',
+    today: '今天',
+    monthStats: '本月统计',
+    totalEntries: '总记录',
+    diaryCount: '日记',
+    workCount: '工作',
+    studyCount: '学习',
+    addScheduledTodo: '添加计划待办',
+    targetDate: '计划日期',
+    targetDateHint: '选择日期后，待办将在该日自动出现在今日待办中',
+    scheduledTodos: '计划待办',
+    noTodos: '暂无待办事项'
+  },
+
+  // 知识库问答
+  knowledgeQA: {
+    title: '向知识库提问',
+    placeholder: '输入你想了解的问题…',
+    askBtn: '提问',
+    searching: '正在检索知识库…',
+    noResults: '未找到相关记录，请尝试换个问法',
+    relatedEntries: '相关记录',
+    aiAnswer: 'AI 回答',
+    aiUnavailable: 'AI 服务暂不可用，以下为关键词匹配结果',
+    askHint: '基于你所有记录的智能问答'
+  },
+
+  // 导入
+  importer: {
+    title: '导入数据',
+    subtitle: '从微信小记、备忘录、Notion 等工具无损导入数据',
+    startBtn: '开始导入',
+    dragHint: '拖拽文件到此处，或点击选择',
+    supportedFormats: '支持格式：JSON（MindFlow/MindFlow 备份）、TXT（微信小记/备忘录）、CSV/Markdown（Notion 导出）',
+    total: '总计',
+    newItems: '新增',
+    conflicts: '冲突',
+    parsing: '解析中…',
+    conflictWarning: '发现 {count} 条冲突（同日期+同模块已存在记录）',
+    skipConflicts: '跳过冲突',
+    overwrite: '覆盖',
+    merge: '追加',
+    keepExisting: '保留已有记录',
+    replaceWith: '用导入数据替换',
+    keepBoth: '同时保留两条',
+    preview: '预览（前 10 条）',
+    moreEntries: '还有 {count} 条…',
+    reselect: '重新选择',
+    confirmImport: '确认导入 {count} 条',
+    importing: '导入中…',
+    importDone: '导入完成',
+    importedSuccess: '成功 {count} 条，跳过 {skipped} 条',
+    errorsCount: '，{count} 条失败',
+    continueImport: '继续导入',
+    done: '完成',
+    jsonBackup: 'JSON 备份',
+    wechatMemo: '微信小记',
+    appleNotes: '备忘录',
+    notionCsv: 'Notion (CSV)',
+    notionMd: 'Notion (Markdown)',
+    autoDetect: '自动识别',
+    tags: '标签'
+  },
+
+  // 隐私页简写
+  privacy: {
+    localMirror: '本地镜像',
+    localMirrorDesc: '所有数据在本地处理，无需网络',
+    bringKey: '自带 Key',
+    bringKeyDesc: '使用你自己的 OpenAI 兼容 API Key',
+    cloud: '云端',
+    cloudDesc: '使用云端订阅模型服务'
   },
 
   // 日历
@@ -414,7 +535,7 @@ export default {
   // 设置
   settings: {
     title: '设置',
-    subtitle: '自定义你的「晨暮」专属体验',
+    subtitle: '自定义你的 MindFlow 专属体验',
     theme: '主题',
     themeDesc: '选择最契合心情的色彩，让使用更惬意',
     themeOptions: {
@@ -456,14 +577,29 @@ export default {
     noQuotesYet: '暂无收藏，赶快添加第一句吧！',
     quoteStats: '收藏统计',
     customQuotesInLibrary: '收藏数量',
-    about: '关于晨暮',
+    about: '关于 MindFlow',
     version: '版本',
     build: '构建',
-    aboutDesc: '“晨暮”是你的私人日志与心灵伴侣，通过细腻的可视化与洞察，帮你梳理思绪、养成习惯、珍藏回忆。',
+    aboutDesc: 'MindFlow 智流日志是本地优先的 AI 个人成长记录中枢：日记、工作日志、学习笔记三合一，AI 自动复盘，自动沉淀 Markdown 知识库。数据 100% 存储在本地。',
     english: 'English',
     defaultLanguage: '默认显示语言',
     chinese: '中文',
-    simplifiedChinese: '简体中文'
+    simplifiedChinese: '简体中文',
+    aiMode: 'AI 模式',
+    dataManager: '数据管理',
+    dataManagerDesc: '导出完整备份或导入历史数据，数据 100% 归你所有',
+    exportData: '导出数据',
+    exportJson: 'JSON 完整备份',
+    exportJsonDesc: '含全部条目与设置，可重新导入',
+    exportCsv: 'CSV 表格',
+    exportCsvDesc: '适合 Excel 统计分析',
+    exportMarkdownAll: 'Markdown 知识库',
+    exportMarkdownAllDesc: '单文件全量导出，Obsidian 可用',
+    importData: '导入数据',
+    importDataDesc: '从微信小记、备忘录、Notion 等工具无损导入',
+    startImport: '开始导入',
+    exporting: '导出中…',
+    entriesCount: '共 {count} 条记录'
   },
 
   // 每日回顾

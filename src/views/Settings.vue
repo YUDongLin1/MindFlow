@@ -1,545 +1,350 @@
-<template>
-  <div class="h-screen flex gradient-bg">
-    <!-- Sidebar -->
-    <div class="w-64 sidebar-gradient p-6 warm-shadow-lg flex flex-col h-full">
-      <div class="mb-8 flex items-center">
-        <img src="/icon1.png" alt="MoodsNote" class="w-10 h-10 mr-3" />
-        <h2 class="text-[#4E3B2B] text-2xl font-bold tracking-wide">MoodsNote</h2>
-      </div>
-      <nav class="flex-1">
-        <ul class="list-none p-0 space-y-2">
-          <li class="mb-3">
-            <router-link
-              to="/"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              :class="{ 'bg-[#FAF3E0]': $route.path === '/' }"
-            >
-              <List class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.home') }}</span>
-            </router-link>
-          </li>
-          <li class="mb-3">
-            <router-link
-              to="/analytics"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              :class="{ 'bg-[#FAF3E0]': $route.path === '/analytics' }"
-            >
-              <BarChart3 class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.analytics') }}</span>
-            </router-link>
-          </li>
-          <li class="mb-3">
-            <a
-              href="#"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              @click.prevent="openCalendar"
-            >
-              <Calendar class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.calendar') }}</span>
-            </a>
-          </li>
-          <li class="mb-3">
-            <a
-              href="#"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              @click.prevent="openHabits"
-            >
-              <BookOpen class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.habits') }}</span>
-            </a>
-          </li>
-          <li class="mb-3">
-            <a
-              href="#"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              @click.prevent="$router.push('/')"
-            >
-              <Search class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.search') }}</span>
-            </a>
-          </li>
-          <li class="mb-3">
-            <a
-              href="#"
-              class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-              @click.prevent="$router.push('/')"
-            >
-              <Download class="mr-3" :size="20" />
-              <span class="font-medium">{{ $t('nav.backup') }}</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      <!-- Settings Link -->
-      <div class="mt-4 pt-4 border-t border-[#C5B891]">
-        <router-link
-          to="/settings"
-          class="text-[#4E3B2B] no-underline flex items-center p-3 rounded-lg hover-lift transition-all duration-200 hover:bg-[#FAF3E0]"
-          :class="{ 'bg-[#FAF3E0]': $route.path === '/settings' }"
-        >
-          <Settings class="mr-3" :size="20" />
-          <span class="font-medium">{{ $t('nav.settings') }}</span>
-        </router-link>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-4xl font-bold text-[#4E3B2B] flex items-center">
-          <span class="mr-3 text-4xl">⚙️</span>
-          {{ $t('settings.title') }}
-        </h1>
-        <p class="text-[#7D5A36] mt-2">
-          {{ $t('settings.subtitle') }}
-        </p>
-      </div>
-
-      <!-- Settings Sections -->
-      <div class="space-y-6 max-w-4xl">
-        <!-- Theme Settings -->
-        <div class="glass-effect p-6 rounded-2xl warm-shadow-lg">
-          <h2 class="text-xl font-bold text-[#4E3B2B] mb-4 flex items-center">
-            <span class="mr-2">🎨</span>
-            {{ $t('settings.theme') }}
-          </h2>
-          <p class="text-sm text-[#7D5A36]/80 mb-4">{{ $t('settings.themeDesc') }}</p>
-          <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <button
-              v-for="card in themeCards"
-              :key="card.key"
-              type="button"
-              @click="setTheme(card.key)"
-              class="group relative overflow-hidden rounded-2xl border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D5A36]"
-              :class="currentTheme === card.key ? 'border-[#7D5A36] warm-shadow-lg bg-white/80 shadow-xl' : 'border-transparent glass-effect hover:border-[#7D5A36]/40 hover:-translate-y-0.5'"
-            >
-              <div
-                class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-80"
-                :style="{ background: card.previewGradient }"
-              ></div>
-              <div class="relative space-y-5 p-5">
-                <div class="flex items-center justify-between gap-3">
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[#7D5A36]/70">
-                      {{ card.subtitle }}
-                    </p>
-                    <div class="mt-1 flex items-center gap-2">
-                      <component :is="card.icon" class="h-5 w-5 text-[#7D5A36]" />
-                      <h3 class="text-xl font-bold text-[#4E3B2B]">
-                        {{ card.title }}
-                      </h3>
-                    </div>
-                  </div>
-                  <div
-                    class="flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200"
-                    :class="currentTheme === card.key ? 'bg-[#7D5A36] text-white shadow-md' : 'border border-[#D3C9A6]/60 text-[#7D5A36]/70 bg-white/70'"
-                  >
-                    <Check v-if="currentTheme === card.key" class="h-4 w-4" />
-                    <component v-else :is="card.icon" class="h-4 w-4" />
-                  </div>
-                </div>
-                <p class="text-sm leading-relaxed text-[#7D5A36]/80">
-                  {{ card.description }}
-                </p>
-                <div class="rounded-xl border border-white/40 bg-white/60 shadow-inner">
-                  <div class="relative h-24 overflow-hidden rounded-xl">
-                    <div class="absolute inset-0" :style="{ background: card.previewGradient }"></div>
-                    <div
-                      class="absolute inset-3 flex h-[calc(100%-24px)] flex-col justify-between rounded-xl p-3"
-                      :style="{ background: card.surfaceColor }"
-                    >
-                      <div class="flex gap-1">
-                        <span class="h-2 flex-1 rounded-full" :style="{ background: card.primaryBarColor }"></span>
-                        <span class="h-2 flex-1 rounded-full opacity-50" :style="{ background: card.accentColor }"></span>
-                      </div>
-                      <div class="space-y-2">
-                        <span class="block h-1.5 w-3/4 rounded-full" :style="{ background: card.textColor, opacity: 0.85 }"></span>
-                        <span class="block h-1.5 w-2/3 rounded-full" :style="{ background: card.textMutedColor, opacity: 0.6 }"></span>
-                        <span class="block h-1.5 w-1/2 rounded-full" :style="{ background: card.textMutedColor, opacity: 0.35 }"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Language Settings -->
-        <div class="glass-effect p-6 rounded-2xl warm-shadow-lg">
-          <h2 class="text-xl font-bold text-[#4E3B2B] mb-4 flex items-center">
-            <span class="mr-2">🌐</span>
-            {{ $t('settings.language') }} / 语言
-          </h2>
-          <p class="text-sm text-[#7D5A36]/80 mb-4">{{ $t('settings.languageDesc') }}</p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              @click="setLanguage('en')"
-              :class="currentLanguage === 'en' ? 'border-[#7D5A36] bg-gradient-to-br from-[#7D5A36]/10 to-[#6B4A2E]/10 warm-shadow scale-105' : 'border-[#D3C9A6]/40 glass-effect hover:border-[#7D5A36]/50'"
-              class="relative flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all duration-200 border-2 hover-lift"
-            >
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">🇺🇸</span>
-                <div class="text-left">
-                  <p class="font-semibold text-[#4E3B2B]">{{ $t('settings.english') }}</p>
-                  <p class="text-xs text-[#7D5A36]/70">{{ $t('settings.defaultLanguage') }}</p>
-                </div>
-              </div>
-              <div v-if="currentLanguage === 'en'" class="w-5 h-5 rounded-full bg-[#7D5A36] flex items-center justify-center">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </button>
-
-            <button
-              @click="setLanguage('zh')"
-              :class="currentLanguage === 'zh' ? 'border-[#7D5A36] bg-gradient-to-br from-[#7D5A36]/10 to-[#6B4A2E]/10 warm-shadow scale-105' : 'border-[#D3C9A6]/40 glass-effect hover:border-[#7D5A36]/50'"
-              class="relative flex items-center justify-between p-4 rounded-xl cursor-pointer transition-all duration-200 border-2 hover-lift"
-            >
-              <div class="flex items-center gap-3">
-                <span class="text-2xl">🇨🇳</span>
-                <div class="text-left">
-                  <p class="font-semibold text-[#4E3B2B]">{{ $t('settings.chinese') }}</p>
-                  <p class="text-xs text-[#7D5A36]/70">{{ $t('settings.simplifiedChinese') }}</p>
-                </div>
-              </div>
-              <div v-if="currentLanguage === 'zh'" class="w-5 h-5 rounded-full bg-[#7D5A36] flex items-center justify-center">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Auto-Save Settings -->
-        <div class="glass-effect p-6 rounded-2xl warm-shadow-lg">
-          <h2 class="text-xl font-bold text-[#4E3B2B] mb-4 flex items-center">
-            <span class="mr-2">💾</span>
-            {{ $t('settings.autoSave') }}
-          </h2>
-          <p class="text-sm text-[#7D5A36]/80 mb-4">{{ $t('settings.autoSaveDesc') }}</p>
-
-          <div class="flex items-center justify-between p-4 glass-effect rounded-xl">
-            <div class="flex-1">
-              <p class="font-semibold text-[#4E3B2B] mb-1">{{ $t('settings.autoSaveOnClose') }}</p>
-              <p class="text-xs text-[#7D5A36]/70">{{ $t('settings.autoSaveOnCloseDesc') }}</p>
-            </div>
-            <button
-              @click="toggleAutoSave"
-              :class="autoSaveEnabled ? 'bg-[#7D5A36]' : 'bg-[#D3C9A6]'"
-              class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7D5A36] focus-visible:ring-offset-2"
-              role="switch"
-              :aria-checked="autoSaveEnabled"
-              :aria-label="$t('settings.autoSaveOnClose')"
-            >
-              <span
-                :class="autoSaveEnabled ? 'translate-x-5' : 'translate-x-0'"
-                class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-              />
-            </button>
-          </div>
-        </div>
-
-        <!-- Daily Quote Bank Settings -->
-        <div class="glass-effect p-6 rounded-2xl warm-shadow-lg">
-          <h2 class="text-xl font-bold text-[#4E3B2B] mb-4 flex items-center">
-            <span class="mr-2">💬</span>
-            {{ $t('settings.dailyQuoteBank') }} / 每日引言库
-          </h2>
-          <p class="text-sm text-[#7D5A36]/80 mb-4">{{ $t('settings.dailyQuoteBankDesc') }}</p>
-
-          <div class="space-y-4">
-            <!-- Custom Quotes -->
-            <div class="p-4 glass-effect rounded-xl">
-              <div class="flex items-center justify-between mb-3">
-                <p class="font-semibold text-[#4E3B2B]">{{ $t('settings.customQuotes') }}</p>
-                <button
-                  @click="showAddQuoteForm = true"
-                  class="px-3 py-1.5 bg-gradient-to-r from-[#7D5A36] to-[#6B4A2E] text-white rounded-lg text-sm font-semibold hover-lift transition-all warm-shadow"
-                >
-                  {{ $t('settings.addQuote') }}
-                </button>
-              </div>
-              <p class="text-xs text-[#7D5A36]/70 mb-3">{{ $t('settings.addQuoteHint') }}</p>
-
-              <!-- Add Quote Form -->
-              <div v-if="showAddQuoteForm" class="mb-4 p-4 bg-[#FAF3E0]/50 rounded-lg space-y-3">
-                <div>
-                  <label class="block text-sm font-semibold text-[#4E3B2B] mb-1">{{ $t('settings.quoteText') }}</label>
-                  <textarea
-                    v-model="newQuote.text"
-                    :placeholder="$t('settings.quoteTextPlaceholder')"
-                    class="w-full px-3 py-2 glass-effect text-[#4E3B2B] rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#7D5A36]"
-                    rows="3"
-                  ></textarea>
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-[#4E3B2B] mb-1">{{ $t('settings.author') }}</label>
-                  <input
-                    v-model="newQuote.author"
-                    type="text"
-                    :placeholder="$t('settings.authorPlaceholder')"
-                    class="w-full px-3 py-2 glass-effect text-[#4E3B2B] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#7D5A36]"
-                  >
-                </div>
-                <div class="flex justify-end gap-2">
-                  <button
-                    @click="showAddQuoteForm = false; newQuote = { text: '', author: '' }"
-                    class="px-4 py-2 bg-[#D3C9A6]/30 text-[#4E3B2B] rounded-lg text-sm font-semibold hover:bg-[#D3C9A6]/50 transition-all"
-                  >
-                    {{ $t('common.cancel') }}
-                  </button>
-                  <button
-                    @click="addCustomQuote"
-                    :disabled="!newQuote.text.trim()"
-                    class="px-4 py-2 bg-gradient-to-r from-[#7D5A36] to-[#6B4A2E] text-white rounded-lg text-sm font-semibold hover-lift transition-all warm-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {{ $t('settings.saveQuote') }}
-                  </button>
-                </div>
-              </div>
-
-              <!-- Custom Quotes List -->
-              <div v-if="customQuotes.length > 0" class="space-y-2">
-                <div
-                  v-for="(quote, index) in customQuotes"
-                  :key="index"
-                  class="p-3 bg-white/50 rounded-lg flex items-start justify-between gap-3 group hover:bg-white/70 transition-all"
-                >
-                  <div class="flex-1">
-                    <p class="text-sm text-[#4E3B2B] italic">"{{ quote.text }}"</p>
-                    <p v-if="quote.author" class="text-xs text-[#7D5A36]/70 mt-1">— {{ quote.author }}</p>
-                  </div>
-                  <button
-                    @click="removeCustomQuote(index)"
-                    class="flex-shrink-0 text-[#7D5A36]/60 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    :title="$t('common.delete')"
-                  >
-                    <X :size="16" />
-                  </button>
-                </div>
-              </div>
-              <div v-else class="text-sm text-[#7D5A36]/60 text-center py-4">
-                {{ $t('settings.noQuotesYet') }}
-              </div>
-            </div>
-
-            <!-- Quote Statistics -->
-            <div class="p-4 glass-effect rounded-xl">
-              <p class="font-semibold text-[#4E3B2B] mb-2">{{ $t('settings.quoteStats') }}</p>
-              <div class="text-center">
-                <p class="text-3xl font-bold text-[#7D5A36]">{{ customQuotes.length }}</p>
-                <p class="text-sm text-[#7D5A36]/70 mt-1">{{ $t('settings.customQuotesInLibrary') }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- About Section -->
-        <div class="glass-effect p-6 rounded-2xl warm-shadow-lg">
-          <h2 class="text-xl font-bold text-[#4E3B2B] mb-4 flex items-center">
-            <span class="mr-2">ℹ️</span>
-            {{ $t('settings.about') }}
-          </h2>
-          <div class="space-y-2 text-sm text-[#7D5A36]">
-            <p><strong>{{ $t('settings.version') }}:</strong> 1.0.5</p>
-            <p><strong>{{ $t('settings.build') }}:</strong> 2025.10.19</p>
-            <p class="pt-2 text-xs">
-              {{ $t('settings.aboutDesc') }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useStore } from 'vuex'
-import {
-  List,
-  BarChart3,
-  Calendar,
-  BookOpen,
-  Search,
-  Download,
-  Settings,
-  X,
-  Sun,
-  Moon,
-  Monitor,
-  Check
-} from 'lucide-vue-next'
+import { Sun, Moon, Monitor, Check, Globe, Info, Settings as SettingsIcon, Upload, Download, Database, FolderOpen, RotateCcw } from 'lucide-vue-next'
 import { useTheme, type Theme } from '@/composables/useTheme'
-import { useToast } from '@/composables/useToast'
+import { useJournalStore } from '@/stores/journal'
+import { useSettingsStore } from '@/stores/settings'
+import { exportJournalJSON, exportJournalCSV, exportJournalMarkdown } from '@/services/dataExport'
+import { APP_VERSION, BUILD_DATE } from '@/utils/appMeta'
 import localforage from 'localforage'
+import ImportPanel from '@/components/ImportPanel.vue'
+import CustomModuleManager from '@/components/CustomModuleManager.vue'
+import PetSettingsPanel from '@/components/PetSettingsPanel.vue'
 
-const router = useRouter()
-const { locale, t } = useI18n()
-const { currentTheme, themes, setTheme } = useTheme()
-const store = useStore()
-const toast = useToast()
+const { t, locale } = useI18n()
+const journalStore = useJournalStore()
+const settingsStore = useSettingsStore()
+const { currentTheme, setTheme } = useTheme()
 
-interface ThemeCard {
-  key: Theme
-  icon: any
-  title: string
-  subtitle: string
-  description: string
-  previewGradient: string
-  surfaceColor: string
-  primaryBarColor: string
-  accentColor: string
-  textColor: string
-  textMutedColor: string
-}
+// 语言
+const currentLanguage = ref<string>(locale.value as string || 'zh')
 
-const themeCards = computed<ThemeCard[]>(() => {
-  const base = [
-    {
-      key: 'light' as Theme,
-      icon: Sun,
-      titleKey: 'settings.themeOptions.light.title',
-      subtitleKey: 'settings.themeOptions.light.subtitle',
-      descriptionKey: 'settings.themeOptions.light.description'
-    },
-    {
-      key: 'dark' as Theme,
-      icon: Moon,
-      titleKey: 'settings.themeOptions.dark.title',
-      subtitleKey: 'settings.themeOptions.dark.subtitle',
-      descriptionKey: 'settings.themeOptions.dark.description'
-    },
-    {
-      key: 'auto' as Theme,
-      icon: Monitor,
-      titleKey: 'settings.themeOptions.auto.title',
-      subtitleKey: 'settings.themeOptions.auto.subtitle',
-      descriptionKey: 'settings.themeOptions.auto.description'
-    }
-  ] as const
-
-  return base.map((entry) => {
-    const palette = themes[entry.key]
-
-    return {
-      key: entry.key,
-      icon: entry.icon,
-      title: t(entry.titleKey),
-      subtitle: t(entry.subtitleKey),
-      description: t(entry.descriptionKey),
-      previewGradient: `linear-gradient(135deg, ${palette.colors.background}, ${palette.colors.surface})`,
-      surfaceColor: palette.colors.surface,
-      primaryBarColor: palette.colors.primary,
-      accentColor: palette.colors.accent,
-      textColor: palette.colors.text,
-      textMutedColor: palette.colors.textSecondary
-    }
-  })
-})
-
-// Language settings
-const currentLanguage = ref('en')
-
-const setLanguage = async (lang: 'en' | 'zh') => {
+async function setLanguage(lang: 'en' | 'zh') {
   currentLanguage.value = lang
-  locale.value = lang // Update i18n locale
+  locale.value = lang
   await localforage.setItem('settings:language', lang)
 }
 
-// Auto-save settings
-const autoSaveEnabled = computed(() => store.getters.getSettings?.autoSaveOnClose ?? true)
+// 自动保存
+const autoSaveEnabled = computed(() => settingsStore.settings?.autoSaveOnClose ?? true)
 
-const toggleAutoSave = async () => {
+async function toggleAutoSave() {
   const newValue = !autoSaveEnabled.value
   try {
-    await store.dispatch('updateSetting', { key: 'autoSaveOnClose', value: newValue })
-    toast.success(
-      newValue ? t('settings.autoSaveEnabled') : t('settings.autoSaveDisabled'),
-      t('toast.success')
-    )
-  } catch (error) {
-    console.error('Failed to update auto-save setting:', error)
-    toast.error(t('settings.autoSaveError'), t('toast.error'))
+    await settingsStore.updateSetting('autoSaveOnClose', newValue)
+  } catch (e) {
+    console.error('Failed to update auto-save:', e)
   }
 }
 
-// Quote settings
-const customQuotes = ref<Array<{ text: string; author: string }>>([])
-const showAddQuoteForm = ref(false)
-const newQuote = ref({ text: '', author: '' })
+// 主题卡片
+const themeOptions: { key: Theme; icon: any; titleKey: string; subtitleKey: string; descKey: string }[] = [
+  { key: 'light', icon: Sun, titleKey: 'settings.themeOptions.light.title', subtitleKey: 'settings.themeOptions.light.subtitle', descKey: 'settings.themeOptions.light.description' },
+  { key: 'dark', icon: Moon, titleKey: 'settings.themeOptions.dark.title', subtitleKey: 'settings.themeOptions.dark.subtitle', descKey: 'settings.themeOptions.dark.description' },
+  { key: 'auto', icon: Monitor, titleKey: 'settings.themeOptions.auto.title', subtitleKey: 'settings.themeOptions.auto.subtitle', descKey: 'settings.themeOptions.auto.description' },
+]
 
-const addCustomQuote = async () => {
-  if (newQuote.value.text.trim()) {
-    customQuotes.value.push({
-      text: newQuote.value.text.trim(),
-      author: newQuote.value.author.trim()
-    })
-    await localforage.setItem('settings:customQuotes', customQuotes.value)
-    newQuote.value = { text: '', author: '' }
-    showAddQuoteForm.value = false
-  }
-}
-
-const removeCustomQuote = async (index: number) => {
-  customQuotes.value.splice(index, 1)
-  await localforage.setItem('settings:customQuotes', customQuotes.value)
-}
-
-// Navigation helpers
-const openCalendar = () => {
-  router.push({ path: '/', query: { openCalendar: 'true' } })
-}
-
-const openHabits = () => {
-  router.push({ path: '/', query: { openHabits: 'true' } })
-}
-
-// Load settings on mount
 onMounted(async () => {
-  // Ensure settings are loaded (main.ts should have already loaded it, but just in case)
-  if (!store.state.settings || Object.keys(store.state.settings).length === 0) {
-    await store.dispatch('loadSettings')
-  }
-  
-  const savedLanguage = await localforage.getItem('settings:language') as string | null
-  if (savedLanguage) {
-    currentLanguage.value = savedLanguage
-    locale.value = savedLanguage // Update i18n locale
-  }
-
-  const savedCustomQuotes = await localforage.getItem('settings:customQuotes') as Array<{ text: string; author: string }> | null
-  if (savedCustomQuotes) {
-    customQuotes.value = savedCustomQuotes
+  loadStoragePath()
+  const savedLang = await localforage.getItem('settings:language') as string | null
+  if (savedLang === 'zh' || savedLang === 'en') {
+    currentLanguage.value = savedLang
+    locale.value = savedLang
   }
 })
+
+// 导入面板
+// 存储路径
+const storagePath = ref('')
+const defaultStoragePath = ref('')
+const storageLoading = ref(false)
+const storageMessage = ref('')
+const storageMessageType = ref<'success' | 'error'>('success')
+
+async function loadStoragePath() {
+  try {
+    const api = (window as any).api
+    if (!api?.storage) return
+    const result = await api.storage.getPath()
+    if (result.success) {
+      storagePath.value = result.currentPath || ''
+      defaultStoragePath.value = result.defaultPath || ''
+    }
+  } catch (e) {
+    console.error('Failed to load storage path:', e)
+  }
+}
+
+async function pickStorageFolder() {
+  try {
+    const api = (window as any).api
+    if (!api?.storage) return
+    const result = await api.storage.pickFolder()
+    if (result.success && result.path) {
+      storageLoading.value = true
+      const setResult = await api.storage.setPath(result.path)
+      if (setResult.success) {
+        storagePath.value = result.path
+        storageMessage.value = '存储路径已更新'
+        storageMessageType.value = 'success'
+      } else {
+        storageMessage.value = setResult.error || '设置失败'
+        storageMessageType.value = 'error'
+      }
+      setTimeout(() => { storageMessage.value = '' }, 3000)
+    }
+  } catch (e) {
+    console.error('Failed to pick folder:', e)
+  } finally {
+    storageLoading.value = false
+  }
+}
+
+async function resetStoragePath() {
+  try {
+    const api = (window as any).api
+    if (!api?.storage) return
+    storageLoading.value = true
+    const result = await api.storage.setPath(defaultStoragePath.value)
+    if (result.success) {
+      storagePath.value = defaultStoragePath.value
+      storageMessage.value = '已恢复默认路径'
+      storageMessageType.value = 'success'
+    }
+    setTimeout(() => { storageMessage.value = '' }, 3000)
+  } catch (e) {
+    console.error('Failed to reset storage path:', e)
+  } finally {
+    storageLoading.value = false
+  }
+}
+
+// 导入面板
+const showImport = ref(false)
+
+// 数据导出
+const exporting = ref('')
+const entriesCount = computed(() => journalStore.entries.length)
+
+async function handleExport(format: 'json' | 'csv' | 'markdown') {
+  if (exporting.value) return
+  exporting.value = format
+  try {
+    const entries = journalStore.entries
+    if (format === 'json') {
+      exportJournalJSON(entries, journalStore.prefs, journalStore.auditLog)
+    } else if (format === 'csv') {
+      exportJournalCSV(entries)
+    } else {
+      exportJournalMarkdown(entries, journalStore.customModules)
+    }
+  } catch (e) {
+    console.error('Export failed:', e)
+  } finally {
+    setTimeout(() => (exporting.value = ''), 600)
+  }
+}
 </script>
 
-<style scoped>
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
+<template>
+  <div class="p-6 max-w-3xl mx-auto">
+    <!-- 标题 -->
+    <div class="mb-8">
+      <h1 class="flex items-center gap-2">
+        <SettingsIcon :size="24" class="text-accent" />
+        {{ t('settings.title') }}
+      </h1>
+      <p class="text-ink-2 text-sm mt-1">{{ t('settings.subtitle') }}</p>
+    </div>
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(212, 165, 116, 0.1);
-  border-radius: 4px;
-}
+    <div class="space-y-6">
+      <!-- 主题设置 -->
+      <section class="card p-5">
+        <h2 class="flex items-center gap-2 mb-4">
+          <Sun :size="18" class="text-ember" />
+          {{ t('settings.theme') }}
+        </h2>
+        <p class="text-sm text-ink-2 mb-4">{{ t('settings.themeDesc') }}</p>
+        <div class="grid grid-cols-3 gap-3">
+          <button
+            v-for="opt in themeOptions"
+            :key="opt.key"
+            @click="setTheme(opt.key)"
+            class="relative flex flex-col items-center p-4 rounded-xl border-2 transition-all cursor-pointer"
+            :class="currentTheme === opt.key
+              ? 'border-accent bg-accent-soft'
+              : 'border-line/50 hover:border-line bg-surface-2'"
+          >
+            <component :is="opt.icon" :size="22" :class="currentTheme === opt.key ? 'text-accent' : 'text-ink-2'" />
+            <span class="text-sm font-medium mt-2" :class="currentTheme === opt.key ? 'text-accent' : 'text-ink'">
+              {{ t(opt.titleKey) }}
+            </span>
+            <span class="text-[0.7rem] text-ink-2 mt-0.5">{{ t(opt.subtitleKey) }}</span>
+            <div v-if="currentTheme === opt.key"
+              class="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center">
+              <Check :size="12" />
+            </div>
+          </button>
+        </div>
+      </section>
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(125, 90, 54, 0.3);
-  border-radius: 4px;
-}
+      <!-- 语言设置 -->
+      <section class="card p-5">
+        <h2 class="flex items-center gap-2 mb-4">
+          <Globe :size="18" class="text-accent" />
+          {{ t('settings.language') }}
+        </h2>
+        <p class="text-sm text-ink-2 mb-4">{{ t('settings.languageDesc') }}</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            @click="setLanguage('zh')"
+            class="flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer"
+            :class="currentLanguage === 'zh'
+              ? 'border-accent bg-accent-soft'
+              : 'border-line/50 hover:border-line bg-surface-2'"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-xl">????</span>
+              <div class="text-left">
+                <div class="font-medium text-sm">{{ t('settings.chinese') }}</div>
+                <div class="text-[0.7rem] text-ink-2">{{ t('settings.simplifiedChinese') }}</div>
+              </div>
+            </div>
+            <div v-if="currentLanguage === 'zh'"
+              class="w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center">
+              <Check :size="12" />
+            </div>
+          </button>
+          <button
+            @click="setLanguage('en')"
+            class="flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer"
+            :class="currentLanguage === 'en'
+              ? 'border-accent bg-accent-soft'
+              : 'border-line/50 hover:border-line bg-surface-2'"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-xl">????</span>
+              <div class="text-left">
+                <div class="font-medium text-sm">{{ t('settings.english') }}</div>
+                <div class="text-[0.7rem] text-ink-2">{{ t('settings.defaultLanguage') }}</div>
+              </div>
+            </div>
+            <div v-if="currentLanguage === 'en'"
+              class="w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center">
+              <Check :size="12" />
+            </div>
+          </button>
+        </div>
+      </section>
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(125, 90, 54, 0.5);
-}
-</style>
+      <!-- 自动保存 -->
+      <section class="card p-5">
+        <h2 class="flex items-center gap-2 mb-4">
+          <Info :size="18" class="text-ember" />
+          {{ t('settings.autoSave') }}
+        </h2>
+        <p class="text-sm text-ink-2 mb-4">{{ t('settings.autoSaveDesc') }}</p>
+        <div class="flex items-center justify-between p-3 bg-surface-2 rounded-xl">
+          <div>
+            <div class="text-sm font-medium">{{ t('settings.autoSaveOnClose') }}</div>
+            <div class="text-[0.75rem] text-ink-2">{{ t('settings.autoSaveOnCloseDesc') }}</div>
+          </div>
+          <button
+            @click="toggleAutoSave"
+            :class="autoSaveEnabled ? 'bg-accent' : 'bg-line'"
+            class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            role="switch"
+            :aria-checked="autoSaveEnabled"
+          >
+            <span
+              :class="autoSaveEnabled ? 'translate-x-5' : 'translate-x-0'"
+              class="pointer-events-none inline-block h-[1.3rem] w-[1.3rem] transform rounded-full bg-white shadow-lg transition duration-200"
+            />
+          </button>
+        </div>
+      </section>
+
+      <!-- 自定义记录模块 -->
+      <section class="card p-5">
+        <CustomModuleManager />
+      </section>
+
+      <!-- 数据管理 -->
+      <section class="card p-5">
+        <h2 class="flex items-center gap-2 mb-4">
+          <Database :size="18" class="text-accent" />
+          {{ t('settings.dataManager') }}
+        </h2>
+        <p class="text-sm text-ink-2 mb-4">
+          {{ t('settings.dataManagerDesc') }} · {{ t('settings.entriesCount', { count: entriesCount }) }}
+        </p>
+
+        <!-- 导出 -->
+        <div class="mb-5">
+          <div class="text-sm font-medium mb-2.5">{{ t('settings.exportData') }}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              class="flex flex-col items-start p-3.5 rounded-xl border-2 border-line/50 bg-surface-2 hover:border-line transition-all cursor-pointer text-left disabled:opacity-50"
+              :disabled="!!exporting"
+              @click="handleExport('json')"
+            >
+              <Download :size="16" class="text-accent mb-1.5" />
+              <span class="text-sm font-medium">{{ t('settings.exportJson') }}</span>
+              <span class="text-[0.7rem] text-ink-2 mt-0.5">{{ t('settings.exportJsonDesc') }}</span>
+            </button>
+            <button
+              class="flex flex-col items-start p-3.5 rounded-xl border-2 border-line/50 bg-surface-2 hover:border-line transition-all cursor-pointer text-left disabled:opacity-50"
+              :disabled="!!exporting"
+              @click="handleExport('csv')"
+            >
+              <Download :size="16" class="text-accent mb-1.5" />
+              <span class="text-sm font-medium">{{ t('settings.exportCsv') }}</span>
+              <span class="text-[0.7rem] text-ink-2 mt-0.5">{{ t('settings.exportCsvDesc') }}</span>
+            </button>
+            <button
+              class="flex flex-col items-start p-3.5 rounded-xl border-2 border-line/50 bg-surface-2 hover:border-line transition-all cursor-pointer text-left disabled:opacity-50"
+              :disabled="!!exporting"
+              @click="handleExport('markdown')"
+            >
+              <Download :size="16" class="text-accent mb-1.5" />
+              <span class="text-sm font-medium">{{ t('settings.exportMarkdownAll') }}</span>
+              <span class="text-[0.7rem] text-ink-2 mt-0.5">{{ t('settings.exportMarkdownAllDesc') }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 导入 -->
+        <div class="flex items-center justify-between p-3 bg-surface-2 rounded-xl">
+          <div>
+            <div class="text-sm font-medium">{{ t('settings.importData') }}</div>
+            <div class="text-[0.75rem] text-ink-2">{{ t('settings.importDataDesc') }}</div>
+          </div>
+          <button class="btn btn-primary" @click="showImport = true">
+            <Upload :size="16" /> {{ t('settings.startImport') }}
+          </button>
+        </div>
+      </section>
+
+      <!-- 导入面板（模态） -->
+      <div v-if="showImport" class="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-sm">
+        <ImportPanel @close="showImport = false" />
+      </div>
+
+      <!-- 关于 -->
+      <section class="card p-5">
+        <h2 class="flex items-center gap-2 mb-4">
+          <Info :size="18" class="text-ink-2" />
+          {{ t('settings.about') }}
+        </h2>
+        <div class="space-y-1.5 text-sm text-ink-2">
+          <p><strong>{{ t('settings.version') }}:</strong> {{ APP_VERSION }}</p>
+          <p><strong>{{ t('settings.build') }}:</strong> {{ BUILD_DATE }}</p>
+          <p class="pt-2 text-xs leading-relaxed">
+            {{ t('settings.aboutDesc') }}
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
+</template>

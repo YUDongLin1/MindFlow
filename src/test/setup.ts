@@ -34,4 +34,7 @@ global.IntersectionObserver = class IntersectionObserver {
 // Configure Vue Test Utils
 config.global.stubs = {
   teleport: true,
+  // 路由组件在单测中无需真实渲染，缺失时会导致整棵组件树渲染失败
+  RouterLink: true,
+  RouterView: true,
 }
