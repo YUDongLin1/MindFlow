@@ -11,10 +11,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src')
     }
   },
+  define: {
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    sourcemap: true,
+    sourcemap: false,
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -29,9 +32,9 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks: {
-          vendor: ['vue', 'vuex', 'vue-router'],
-          editor: ['quill'],
-          utils: ['localforage', 'dompurify', 'jspdf'],
+          vendor: ['vue', 'pinia', 'vuex', 'vue-router'],
+          editor: ['@tiptap/vue-3', '@tiptap/starter-kit'],
+          utils: ['localforage', 'dompurify'],
           icons: ['lucide-vue-next']
         }
       },
@@ -41,8 +44,11 @@ export default defineConfig({
   server: {
     host: 'localhost',
     port: 3000,
+    watch: {
+      ignored: ['**/dist-electron/**', '**/dist_old_*/**', '**/node_modules/**', '**/dist/**']
+    }
   },
   optimizeDeps: {
-    include: ['vue', 'vuex', 'vue-router', 'quill', 'localforage', 'dompurify', 'jspdf']
+    include: ['vue', 'pinia', 'vuex', 'vue-router', '@tiptap/vue-3', '@tiptap/starter-kit', 'localforage', 'dompurify']
   }
 })

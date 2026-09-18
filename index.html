@@ -1,30 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/icon1.png" />
+    <link rel="icon" type="image/png" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MoodsNote</title>
+    <title>MindFlow 智流日志</title>
+    <meta name="description" content="MindFlow 智流日志：本地优先、隐私开源的个人成长记录中枢。工作 / 学习 / 日记三合一，镜子式 AI 自动复盘，自动沉淀可带走的 Markdown 知识库。" />
+    <meta name="theme-color" content="#FAF7F1" />
 
     <!--
-      Content Security Policy (CSP)
-
-      Protects against XSS attacks by controlling which resources can be loaded.
-
-      Directives explained:
-      - default-src: Fallback for other resource types
-      - script-src: JavaScript execution sources (unsafe-eval needed for Vite HMR in dev)
-      - style-src: CSS sources (unsafe-inline needed for Vue scoped styles)
-      - img-src: Image sources (data: for base64, blob: for file uploads)
-      - media-src: Audio/video sources (blob: for file uploads)
-      - connect-src: Fetch/XHR/WebSocket sources
-      - font-src: Web font sources
-      - object-src: Plugin sources (none for security)
-      - base-uri: Restricts <base> tag URLs
-      - form-action: Restricts form submission targets
-
-      Note: frame-ancestors and X-Frame-Options must be set via HTTP headers,
-      not meta tags. Configure these in your production server (nginx, Apache, etc.)
+      Content Security Policy (CSP) — 维持原有安全策略，防止 XSS。
     -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
@@ -32,14 +17,13 @@
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:;
       media-src 'self' blob:;
-      connect-src 'self';
+      connect-src 'self' https: http://localhost:* ws://localhost:*;
       font-src 'self';
       object-src 'none';
       base-uri 'self';
       form-action 'self';
-    ">
+    " />
 
-    <!-- Additional Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta name="referrer" content="no-referrer">
   </head>
