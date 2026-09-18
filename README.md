@@ -19,6 +19,7 @@
 ![Electron](https://img.shields.io/badge/Electron-33-blue?logo=electron)
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js)
 ![Tests](https://img.shields.io/badge/tests-32%2F32%20passing-brightgreen)
+[![CI](https://github.com/YUDongLin1/MindFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/YUDongLin1/MindFlow/actions/workflows/ci.yml)
 
 **MindFlow 智流日志** 是一款基于 **Vue 3** + **Vite** + **Electron** 构建的 **AI 个人成长记录应用**，基于开源项目 [MoodsNote 晨暮日记](https://github.com/PStarH/MoodNotes)（AGPL-3.0）二次开发。它坚持**本地优先（Local-First）**的设计理念：日记、工作日志、学习笔记三合一记录，配合 AI 复盘与自动生成的 Markdown 知识库，帮助你建立「记录 → 复盘 → 沉淀」的成长闭环。数据 100% 存储在本地，不上传、不训练。
 
@@ -173,6 +174,12 @@ flowchart LR
 - 测试：Vitest（happy-dom）
 
 ## 快速开始
+
+### 直接下载（Windows）
+
+👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)**（NSIS 安装版，约 87 MB，见 [Releases](https://github.com/YUDongLin1/MindFlow/releases)）
+
+### 从源码运行
 
 环境要求：Node.js 18+，支持 Windows / macOS / Linux。
 

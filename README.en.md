@@ -16,6 +16,8 @@
 ![Version](https://img.shields.io/badge/version-1.0.1-green)
 ![Electron](https://img.shields.io/badge/Electron-33-blue?logo=electron)
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vue.js)
+![Tests](https://img.shields.io/badge/tests-32%2F32%20passing-brightgreen)
+[![CI](https://github.com/YUDongLin1/MindFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/YUDongLin1/MindFlow/actions/workflows/ci.yml)
 
 **MindFlow** is a **local-first, AI-powered personal growth journal** built with **Vue 3** + **Vite** + **Electron**, developed on top of the open-source project [MoodsNote](https://github.com/PStarH/MoodNotes) (AGPL-3.0). It unifies diary, work log, and study notes in one place, with AI-assisted reflection and an auto-generated Markdown knowledge base. All data stays 100% on your device — never uploaded, never used for training.
 
@@ -38,6 +40,12 @@
 - Tests: Vitest (happy-dom)
 
 ## Quick Start
+
+### Download (Windows)
+
+👉 **[MindFlow-Setup-1.0.1-x64.exe](https://github.com/YUDongLin1/MindFlow/releases/download/v1.0.1/MindFlow-Setup-1.0.1-x64.exe)** (NSIS installer, ~87 MB — see [Releases](https://github.com/YUDongLin1/MindFlow/releases))
+
+### Run from source
 
 Requirements: Node.js 18+; Windows / macOS / Linux.
 
@@ -62,7 +70,7 @@ npm run package:win
 npm run type-check
 ```
 
-Windows artifacts: `MindFlow Setup 1.0.0.exe` (NSIS installer) and `MindFlow 1.0.0.exe` (portable).
+Windows artifacts: `MindFlow-Setup-1.0.1-x64.exe` (NSIS installer) and `MindFlow 1.0.1.exe` (portable). Packaging uses `electron-builder-override.json` as the single source of config — one command: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-win.ps1`.
 
 ## Keyboard Shortcuts
 
