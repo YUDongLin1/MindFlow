@@ -5,6 +5,13 @@ All notable changes to MindFlow 智流日志（前身为 MoodsNote）will be doc
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.5/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 📝 Docs
+
+- README（中 / 英）新增产品界面预览：顶部主图 + 6 张截图画廊（今日 / 成长 / 知识库 / 日历 / 隐私 / 深色模式），位于 `docs/screenshots/`
+- 移除内部素材 `docs/MiMo-Desktop-内测申请-素材.md` 的全部引用与 `.gitignore` 规则（不公开，文件从未进入 git 历史）
+
 ## [1.0.0] - 2026-08-03
 
 ### 🎉 MindFlow 智流日志首个版本

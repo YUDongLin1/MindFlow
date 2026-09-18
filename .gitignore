@@ -67,8 +67,6 @@ FIXES_SUMMARY.md
 .workbuddy/
 /HANDOFF.md
 /overview.md
-# 内含个人信息/内部素材，待作者审阅后决定是否公开
-/docs/MiMo-Desktop-内测申请-素材.md
 # 根目录调试残留（斜杠前缀仅匹配根目录，不影响 scripts/ 下的正式脚本）
 /*.ps1
 /*.txt

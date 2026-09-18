@@ -21,6 +21,10 @@
 
 **MindFlow** is a **local-first, AI-powered personal growth journal** built with **Vue 3** + **Vite** + **Electron**, developed on top of the open-source project [MoodsNote](https://github.com/PStarH/MoodNotes) (AGPL-3.0). It unifies diary, work log, and study notes in one place, with AI-assisted reflection and an auto-generated Markdown knowledge base. All data stays 100% on your device — never uploaded, never used for training.
 
+<div align="center">
+  <img src="./docs/screenshots/main-today.png" alt="MindFlow Today view" width="880" />
+</div>
+
 ## Features
 
 - **Three-module journaling**: diary / work log / study notes, each with guided templates; rich text editor (Tiptap) with plain-text toggle; voice input (Web Speech API, Chinese); smart tag suggestions (TF-IDF); auto metadata (time / location / weather); custom record modules
@@ -28,6 +32,43 @@
 - **Tracking & views**: mood / energy / stress tracking with ECharts; daily todos synced to the Growth and Calendar views; calendar month view; daily summary cards
 - **Knowledge base**: every entry becomes Markdown with frontmatter and `[[wiki-links]]`; force-directed link graph; spaced repetition (SM-2); full-text search and AI Q&A
 - **Data & privacy**: local storage (IndexedDB via LocalForage), fully offline, configurable storage location; export JSON backup / CSV / Markdown; import 5 formats (JSON/TXT/CSV/Markdown/HTML, auto-detected by content) with conflict preview; desktop pet companion
+
+## Screenshots
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/main-today.png" alt="Today · writing and AI reflection" width="100%" />
+      <br /><sub><b>Today</b> · guided templates + AI reflection draft</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/growth.png" alt="Growth · monthly review" width="100%" />
+      <br /><sub><b>Growth</b> · monthly stats / heatmap / module split / top tags</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/knowledge.png" alt="Knowledge · link graph and review queue" width="100%" />
+      <br /><sub><b>Knowledge</b> · link graph + SM-2 review queue + AI Q&amp;A</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/calendar.png" alt="Calendar · month view" width="100%" />
+      <br /><sub><b>Calendar</b> · month view + future todos synced to their day</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/privacy.png" alt="Privacy · local data path" width="100%" />
+      <br /><sub><b>Privacy</b> · visible &amp; editable local storage path, sanitized export</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/dark-mode.png" alt="Dark mode" width="100%" />
+      <br /><sub><b>Dark mode</b> · "Paper · Ink · Flow" light/dark design system</sub>
+    </td>
+  </tr>
+</table>
+</div>
 
 ## Tech Stack
 

@@ -25,6 +25,10 @@
 
 > 这是一个**产品驱动**的项目：从用户痛点出发定义功能，用埋点与 A/B 实验驱动迭代，最终交付可安装的完整产品。详见 [我的职责与产出](#我的职责与产出)。
 
+<div align="center">
+  <img src="./docs/screenshots/main-today.png" alt="MindFlow 主界面 · 今日" width="880" />
+</div>
+
 ## 目录
 
 - [为什么做这个项目](#为什么做这个项目)
@@ -34,6 +38,7 @@
 - [核心指标与验证](#核心指标与验证)
 - [我的职责与产出](#我的职责与产出)
 - [核心功能](#核心功能)
+- [界面预览](#界面预览)
 - [技术栈](#技术栈)
 - [快速开始](#快速开始)
 - [快捷键](#快捷键)
@@ -162,6 +167,43 @@ flowchart LR
   - 本地存储（IndexedDB / LocalForage），离线可用，存储位置可配置
   - 导出 JSON 完整备份 / CSV / Markdown；导入 5 种格式（JSON/TXT/CSV/Markdown/HTML，按内容自动识别），冲突预检
   - 桌面宠物陪伴（预设猫 / 狗 / 植物 + 自定义上传）
+
+## 界面预览
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/main-today.png" alt="今日 · 三模块记录与 AI 复盘" width="100%" />
+      <br /><sub><b>今日</b> · 三模板引导记录 + AI 复盘草稿</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/growth.png" alt="成长 · 月回顾与数据洞察" width="100%" />
+      <br /><sub><b>成长</b> · 月统计 / 热力图 / 模块分布 / 标签 Top10</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/knowledge.png" alt="知识库 · 双链图谱与复习队列" width="100%" />
+      <br /><sub><b>知识库</b> · 双链图谱 + SM-2 复习队列 + AI 问答</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/calendar.png" alt="日历 · 月视图与待办联动" width="100%" />
+      <br /><sub><b>日历</b> · 月视图浏览 + 未来待办到日自动同步</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/privacy.png" alt="隐私 · 数据路径与本地优先" width="100%" />
+      <br /><sub><b>隐私</b> · 本地存储路径可见可改 + 导出脱敏</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./docs/screenshots/dark-mode.png" alt="深色模式" width="100%" />
+      <br /><sub><b>深色模式</b> · 设计系统「纸·墨·流」明暗双主题</sub>
+    </td>
+  </tr>
+</table>
+</div>
 
 ## 技术栈
 

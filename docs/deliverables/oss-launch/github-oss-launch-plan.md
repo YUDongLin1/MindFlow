@@ -19,7 +19,7 @@
 | 7 | `verification-screenshots/` 含个人桌面隐私（QQ、账号昵称、聊天窗口） | 隐私泄露 | 加入 .gitignore，不推送 |
 | 8 | `.gitignore` 缺少 `.qoder/`、`.workbuddy/`、`dist-electron2/`、`nsis-3.10/`、`HANDOFF.md` 等 | AI 工作区/内部文档可能入库 | Step 1.2 追加规则 |
 | 9 | 版本不一致：README 徽章 `1.0.0` vs `package.json` `1.0.1` | 细节减分 | Step 1.5 统一为 1.0.1 |
-| 10 | `docs/MiMo-Desktop-内测申请-素材.md` 疑似内测申请材料 | 可能含内部信息 | 🔍【需补充】人工审阅决定去留 |
+| 10 | `docs/MiMo-Desktop-内测申请-素材.md` 疑似内测申请材料 | 可能含内部信息 | ✅ 已删除（作者确认不需要：本地文件已不存在，从未进入 git 历史，`.gitignore` 规则同步移除） |
 
 好消息：全仓库**未发现硬编码 API Key**（已扫 `sk-`/`apiKey` 模式）；`.env.example` 全部为空值；最大跟踪文件仅 1.2MB，**不需要 Git LFS**；跟踪文件仅 162 个，历史只有 1 个 commit，敏感信息扫描范围极小。
 
@@ -119,9 +119,9 @@ New-Item -ItemType Directory -Force docs/screenshots | Out-Null
 # 截图放入 docs/screenshots/，README 中以 docs/screenshots/xxx.png 引用
 ```
 
-> 🔍【需补充】重拍 5 张截图。旧图 `public/screenshots/` 建议一并移入 `_local_archive` 并同步修改 README 引用路径。
+> ✅ **已完成**：6 张截图已放入 `docs/screenshots/`（今日 / 成长 / 知识库 / 日历 / 隐私 / 深色模式），README 顶部主图 + 「界面预览」画廊，中英文 README 均已引用；旧的上游 UI 截图 `public/screenshots/` 已归档至 `_local_archive`，README 中不再引用。
 
-**C. 文档审查**：🔍【需补充】打开 `docs/MiMo-Desktop-内测申请-素材.md` 确认是否含内部信息；如有，追加到 .gitignore 或移入 `_local_archive`。
+**C. 文档审查**：✅ 已处理 —— `docs/MiMo-Desktop-内测申请-素材.md` 经作者确认不需要，本地文件已删除；该文件从未进入 git 历史（`git log --all` 无记录、未跟踪），`.gitignore` 中的忽略规则与本文档所有引用均已移除。
 
 **D. 专业级复扫（可选但推荐，一行命令装好 gitleaks）**：
 
@@ -468,11 +468,16 @@ npm run test       # 必须全绿（预期 32/32）
 
 ## 附 5：剩余待你操作（我无法代做）
 
-1. **重拍 5 张新 UI 截图**放 `docs/screenshots/`，在 README 顶部加一张主图 —— 这是目前 README 最大的短板（现在只有图标，没有界面）。
-2. 复核 `docs/MiMo-Desktop-内测申请-素材.md`（已 gitignore，未推送）能否公开，能公开就把它纳入仓库作为产品材料。
-3. 仓库 Settings → General → Social preview 上传 1280×640 横图（可用 `docs/landing-preview.png` 裁切）。
-4. 个人主页 pin 该仓库。
-5. 可选：把 4 个被移出的验收测试修好后再纳入（根因已记录在附 2 下方）。
+### 已完成（本次补做）
+
+1. ✅ **UI 截图**：6 张（今日 / 成长 / 知识库 / 日历 / 隐私 / 深色模式）已放入 `docs/screenshots/`（为兼容 GitHub 相对路径，文件名统一为 ASCII：`main-today.png` / `growth.png` / `knowledge.png` / `calendar.png` / `privacy.png` / `dark-mode.png`）；README 顶部加主图，新增「界面预览」画廊，中英文 README 同步。
+2. ✅ **MiMo 内测申请素材**：按你的要求全部删除 —— 本地文件、`.gitignore` 忽略规则、本文档引用，三处清理完毕；该文件从未进入 git 历史，无需改写历史。
+
+### 仍需你操作
+
+1. 仓库 Settings → General → Social preview 上传 1280×640 横图（可用 `docs/landing-preview.png` 裁切，或从 `docs/screenshots/main-today.png` 裁切）。
+2. 个人主页 pin 该仓库。
+3. 可选：把 4 个被移出的验收测试修好后再纳入（根因已记录在附 2 下方）。
 
 ### 后续更新常用命令
 
