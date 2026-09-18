@@ -437,7 +437,7 @@ npm run test       # 必须全绿（预期 32/32）
   - `calendar-todo.test.ts` 剩余 3 项：待办自动同步与旧待办清理逻辑
   - `document-cleanup.test.ts` 剩余 2 项：注释/字符串中的旧品牌词断言
 
-## 附 3：CI 首次运行暴露的 3 个问题（已修复）
+## 附 3：CI 首次运行暴露的 5 个问题（已修复）
 
 > 这三个问题**本地都不会出现**，因为本地有 `electron/node_modules`、有历史安装缓存。这正是「全新克隆验证」必须做的原因。
 
@@ -446,6 +446,8 @@ npm run test       # 必须全绿（预期 32/32）
 | 1 | `npm run build` 报 TS2687 / TS2717 | 全新环境没有 `electron/node_modules`，tsc 回落到根目录 `@types/node`（版本与 electron 33 的 `electron.d.ts` 不一致） | `electron/tsconfig.json` 增加 `"skipLibCheck": true` |
 | 2 | `npm run test:coverage` 失败 | `vitest.config.ts` 配了 `provider: 'v8'`，但 `@vitest/coverage-v8` 从未写进 devDependencies | `npm i -D @vitest/coverage-v8@^3.2.4` |
 | 3 | Build and Release 在 Linux 打包中断 | electron-builder 打 deb 要求 `package.json` 的 `author` 含 `email` | 补 `author.email`；同时给 matrix 加 `fail-fast: false`，单平台失败不再取消其余平台 |
+| 4 | Create Release 报 `Resource not accessible by integration` | 默认 `GITHUB_TOKEN` 只有 `contents: read`，softprops/action-gh-release 无法写 Release | workflow 顶层声明 `permissions: contents: write` |
+| 5 | CI 产物名 `MindFlow Setup 1.0.1.exe` 与本地/ README 不一致 | nsis 未指定 `artifactName` | `build.nsis.artifactName = MindFlow-Setup-${version}-${arch}.${ext}` |
 
 修复后全新目录复验：`npm install` → `npm run test:run`（32/32）→ `npm run test:coverage` → `npm run build` **全部 EXIT=0**。
 
@@ -461,7 +463,8 @@ npm run test       # 必须全绿（预期 32/32）
 | 提交历史 | 58 个提交，完整保留上游 MoodNotes 历史（AGPL-3.0 署名合规） |
 | 推送文件 | 217 个 / 4.21 MB，无调试残留、无 `_local_archive`、无 `verification-screenshots` |
 | 全新环境复现 | `C:\tmp\mf-verify` 全新解包 → install → test → coverage → build 全部通过 |
-| GitHub Actions | CI = success；Build and Release 打包三平台并回传产物 |
+| GitHub Actions | CI = success（Test + Build）；Build and Release = success（macOS / Ubuntu / Windows 三平台打包 + Create Release） |
+| Release v1.0.1 资产 | dmg 172.9 MB / AppImage 104.8 MB / `MindFlow-Setup-1.0.1-x64.exe` 78.4 MB / 便携版 78.2 MB / deb 82.7 MB，共 5 个 |
 
 ## 附 5：剩余待你操作（我无法代做）
 
