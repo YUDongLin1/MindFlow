@@ -149,6 +149,7 @@
       "signAndEditExecutable": false
     },
     "nsis": {
+      "artifactName": "MindFlow-Setup-${version}-${arch}.${ext}",
       "include": "build-resources/installer.nsh",
       "warningsAsErrors": false,
       "oneClick": false,
