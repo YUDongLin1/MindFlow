@@ -17,40 +17,31 @@ For best results across all platforms, you need:
 ### Linux (.png)
 - 512x512 or 1024x1024 PNG works fine
 
-## Converting icon1.png
+## Generating icons
 
-If you only have icon1.png, you can convert it using these tools:
+Every icon file is produced by one script — no manual conversion:
 
-### macOS:
 ```bash
-# Install iconutil (comes with Xcode Command Line Tools)
-# Create .iconset directory with multiple sizes
-mkdir icon.iconset
-sips -z 16 16     icon1.png --out icon.iconset/icon_16x16.png
-sips -z 32 32     icon1.png --out icon.iconset/icon_16x16@2x.png
-sips -z 32 32     icon1.png --out icon.iconset/icon_32x32.png
-sips -z 64 64     icon1.png --out icon.iconset/icon_32x32@2x.png
-sips -z 128 128   icon1.png --out icon.iconset/icon_128x128.png
-sips -z 256 256   icon1.png --out icon.iconset/icon_128x128@2x.png
-sips -z 256 256   icon1.png --out icon.iconset/icon_256x256.png
-sips -z 512 512   icon1.png --out icon.iconset/icon_256x256@2x.png
-sips -z 512 512   icon1.png --out icon.iconset/icon_512x512.png
-sips -z 1024 1024 icon1.png --out icon.iconset/icon_512x512@2x.png
-
-# Convert to .icns
-iconutil -c icns icon.iconset -o icon.icns
+pip install Pillow
+python scripts/generate-icon.py        # add --dry-run to just list the outputs
 ```
 
-### Windows (using online converter or ImageMagick):
-```bash
-# Using ImageMagick
-magick convert icon1.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico
-```
+It renders the MindFlow brand mark (ink squircle + paper-white drop + flow ribbon,
+from the 「纸 · 墨 · 流」 design system) and writes all platform variants:
 
-### Or use online tools:
-- https://iconverticons.com/online/
-- https://convertico.com/
+| Target | Output |
+|--------|--------|
+| macOS | `icon.icns`（16 / 32 / 64 / 128 / 256 / 512 / 1024，含 @2x 条目） |
+| Windows | `icon.ico`（16 / 32 / 48 / 64 / 128 / 256） + `windows-icons/icon-*.png` |
+| Linux | `linux-icons/icon.png`、`linux-icons/icon-512.png` |
+| Web / favicon | `public/icon.png`、`public/icon1.png` |
+| iOS / Android | `public/AppIcons/**`（appiconset 全套 + mipmap + 商店图） |
+| Vector source | `docs/assets/mindflow-icon.svg` |
 
-## Current Setup
+To change the mark, edit the colour and composition constants at the top of
+`scripts/generate-icon.py` and re-run — all sizes stay in sync.
 
-For now, we're using `icon1.png` directly. electron-builder will attempt to convert it automatically, but for production releases, it's better to provide properly formatted .icns and .ico files.
+## Legacy note
+
+The previous icon set was inherited from the upstream MoodsNote project and has been
+replaced. `public/screenshots/` (upstream UI captures) was removed the same way.

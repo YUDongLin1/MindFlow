@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 🎨 Brand
+
+- 全新原创应用图标「墨滴 · 流带」：墨色圆角底 + 纸白墨滴 + 流青 S 形流带（取自设计系统「纸 · 墨 · 流」），替换上游 MoodsNote 遗留图标
+- 新增 `scripts/generate-icon.py`：一条命令生成 56 个平台图标（icns / ico / linux / iOS / Android / 商店图）+ SVG 矢量源 `docs/assets/mindflow-icon.svg`
+- README 顶部主图与 favicon 同步为新图标
+
 ### 📝 Docs
 
 - README（中 / 英）新增产品界面预览：顶部主图 + 6 张截图画廊（今日 / 成长 / 知识库 / 日历 / 隐私 / 深色模式），位于 `docs/screenshots/`
