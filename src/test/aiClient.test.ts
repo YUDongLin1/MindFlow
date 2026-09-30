@@ -63,7 +63,7 @@ function makeEntry(overrides: Partial<JournalEntry> = {}): JournalEntry {
 // ---------------------------------------------------------------------------
 
 describe('checkProvenance — 溯源覆盖率校验', () => {
-  // 测试 1: AI 输出包含原文片段 → coverage >= 0.35 → passed: true
+  // 测试 1: AI 输出包含原文片段 → coverage >= 0.55 → passed: true
   it('测试1: AI输出包含原文片段时应通过溯源校验', () => {
     const userText = '今天完成了数据结构设计，画了ER图'
     const segments: AIReviewSegment = {
@@ -77,10 +77,10 @@ describe('checkProvenance — 溯源覆盖率校验', () => {
 
     expect(result.passed).toBe(true)
     expect(result.failedSegments).toHaveLength(0)
-    expect(result.coverage).toBeGreaterThanOrEqual(0.35)
+    expect(result.coverage).toBeGreaterThanOrEqual(0.55)
   })
 
-  // 测试 2: AI 输出完全无关内容 → coverage < 0.35 → passed: false
+  // 测试 2: AI 输出完全无关内容 → coverage < 0.55 → passed: false
   it('测试2: AI输出完全无关内容时应不通过溯源校验', () => {
     const userText = '今天完成了数据结构设计'
     const segments: AIReviewSegment = {
@@ -108,10 +108,13 @@ describe('checkProvenance — 溯源覆盖率校验', () => {
 
     const result = checkProvenance(userText, segments)
 
-    // 占位文本不应出现在 failedSegments
+    // 占位文本不应出现在 failedSegments，但应明确记录为 uncheckedSegments
     expect(result.failedSegments).not.toContain('learnings')
     expect(result.failedSegments).not.toContain('improvements')
     expect(result.failedSegments).not.toContain('actions')
+    expect(result.uncheckedSegments).toEqual(
+      expect.arrayContaining(['learnings', 'improvements', 'actions'])
+    )
   })
 
   // 测试 4: 模型自报 accuracyFlag=true 但 provenance.passed=false → 最终 accuracyFlag 应为 false

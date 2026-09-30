@@ -31,6 +31,12 @@ export interface AiAPI {
   fetch: (payload: AiFetchPayload) => Promise<AiFetchResult>
 }
 
+export interface KeychainAPI {
+  set: (key: string) => Promise<{ success: boolean; error?: string }>
+  get: () => Promise<{ success: boolean; key?: string; error?: string }>
+  delete: () => Promise<{ success: boolean; error?: string }>
+}
+
 export interface MediaManifestEntry {
   id: string
   storedName: string
@@ -63,6 +69,7 @@ export interface ElectronAPI {
   usage: UsageAPI
   media: MediaAPI
   ai: AiAPI
+  keychain: KeychainAPI
 }
 
 contextBridge.exposeInMainWorld('api', {
@@ -107,6 +114,11 @@ contextBridge.exposeInMainWorld('api', {
   ai: {
     fetch: (payload: AiFetchPayload) => ipcRenderer.invoke('ai:fetch', payload),
   } as AiAPI,
+  keychain: {
+    set: (key: string) => ipcRenderer.invoke('keychain:set', key),
+    get: () => ipcRenderer.invoke('keychain:get'),
+    delete: () => ipcRenderer.invoke('keychain:delete'),
+  } as KeychainAPI,
 })
 
 declare global {
