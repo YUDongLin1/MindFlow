@@ -99,13 +99,15 @@ const exp1Variant = ref<'control' | 'treatment' | null>(null)
 
 onMounted(async () => {
   exp1Variant.value = await getVariant('exp1_privacy')
+  // 预热：把系统密钥库中的 Key 载入内存，供连接测试与输入框回显使用
+  await journalStore.getAIKey()
 })
 
 function setMode(m: AIMode) {
   journalStore.setAIMode(m)
 }
-function onKey(e: Event) {
-  journalStore.setAIKey((e.target as HTMLInputElement).value)
+async function onKey(e: Event) {
+  await journalStore.setAIKey((e.target as HTMLInputElement).value)
 }
 function onBaseUrl(e: Event) {
   journalStore.setAIPref({ aiBaseUrl: (e.target as HTMLInputElement).value })

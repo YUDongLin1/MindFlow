@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, Menu, powerMonitor, net, Tray, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, Menu, powerMonitor, net, Tray, nativeImage, safeStorage } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
@@ -26,20 +26,27 @@ if (process.env.PORTABLE_EXECUTABLE_DIR) {
 // ---------------------------------------------------------------------------
 // 渲染进程沙箱与 GPU 兼容处理（必须在 app ready 之前设置）
 //
-// 背景：在部分 Windows 环境下（尤其是启用了第三方安全软件、或用户目录
-// 带有中文/非 ASCII 路径时），Chromium 的渲染进程沙箱初始化会失败，表现为
-// 窗口一闪而过、renderer 进程以 render-process-gone {reason:"killed"} 崩溃。
-// 这里显式关闭渲染进程沙箱与硬件加速，避免用户必须手动追加 --no-sandbox。
-// 同时保留命令行优先级：用户/CI 已显式传入的参数不被覆盖。
+// 安全说明：默认保持 Chromium 渲染沙箱开启。历史版本曾在 Windows 下默认
+// 关闭沙箱以兼容部分环境（第三方安全软件、中文路径导致的渲染崩溃），但
+// 关闭沙箱会移除纵深防御的最后一道防线。现改为显式 opt-in 兼容模式：
+//   1) 启动参数追加 --no-sandbox，或
+//   2) 环境变量 MINDFLOW_COMPAT_NO_SANDBOX=1
+// 若确实遇到渲染崩溃，可用兼容模式启动，日志中会明确提示风险。
+// 背景：部分 Windows 环境下渲染进程沙箱初始化失败时，表现为窗口一闪而过、
+// renderer 进程以 render-process-gone {reason:"killed"} 崩溃。
 // ---------------------------------------------------------------------------
 const userArgv = process.argv.slice(1);
 const hasNoSandbox = userArgv.includes('--no-sandbox');
+const compatNoSandbox = process.env.MINDFLOW_COMPAT_NO_SANDBOX === '1';
 const hasDisableGpu = userArgv.includes('--disable-gpu');
 
 if (process.platform === 'win32') {
-  if (!hasNoSandbox) {
+  if (hasNoSandbox || compatNoSandbox) {
     app.commandLine.appendSwitch('no-sandbox');
     app.commandLine.appendSwitch('disable-setuid-sandbox');
+    console.warn('[sandbox] 警告：兼容模式已启用，渲染沙箱已关闭，安全性降低');
+  } else {
+    console.log('[sandbox] 渲染沙箱已启用');
   }
   if (!hasDisableGpu) {
     // 部分集显/老驱动环境下 GPU 进程反复崩溃，关闭硬件加速更稳定
@@ -47,7 +54,6 @@ if (process.platform === 'win32') {
   }
   // 避免网络服务进程在本机网络栈上的偶发崩溃
   app.commandLine.appendSwitch('disable-features', 'NetworkServiceSandbox');
-  console.log('[sandbox] Windows 兼容模式：已关闭渲染沙箱与硬件加速');
 }
 
 let mainWindow: BrowserWindow | null;
@@ -990,6 +996,54 @@ ipcMain.handle('ai:fetch', async (_event, payload: AiFetchPayload): Promise<AiFe
   const bodyText = await resp.text();
 
   return { ok: resp.ok, status: resp.status, headers, bodyText };
+});
+
+// ---------------------------------------------------------------------------
+// keychain: API Key 系统密钥库（safeStorage）
+//
+// API Key 不再以明文存入 IndexedDB。渲染层通过 window.api.keychain 存取，
+// 主进程用 safeStorage（Windows DPAPI / macOS Keychain / Linux libsecret）
+// 加密后落盘到 userData/keychain.bin（文件权限 600）。
+// 若系统加密不可用（如部分 Linux 发行版缺 keyring），返回
+// ENCRYPTION_UNAVAILABLE，由渲染层降级处理并明确提示用户。
+// ---------------------------------------------------------------------------
+function getKeychainPath(): string {
+  return path.join(app.getPath('userData'), 'keychain.bin');
+}
+
+ipcMain.handle('keychain:set', async (_event, key: string) => {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return { success: false, error: 'ENCRYPTION_UNAVAILABLE' };
+  }
+  try {
+    const encrypted = safeStorage.encryptString(String(key ?? ''));
+    await fs.writeFile(getKeychainPath(), encrypted, { mode: 0o600 });
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e?.message ?? 'ENCRYPT_FAILED' };
+  }
+});
+
+ipcMain.handle('keychain:get', async () => {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return { success: false, error: 'ENCRYPTION_UNAVAILABLE' };
+  }
+  try {
+    const buf = await fs.readFile(getKeychainPath());
+    return { success: true, key: safeStorage.decryptString(buf) };
+  } catch (e: any) {
+    if (e?.code === 'ENOENT') return { success: true, key: '' };
+    return { success: false, error: e?.message ?? 'DECRYPT_FAILED' };
+  }
+});
+
+ipcMain.handle('keychain:delete', async () => {
+  try {
+    await fs.unlink(getKeychainPath());
+  } catch {
+    // 文件不存在也视为成功
+  }
+  return { success: true };
 });
 
 app.whenReady().then(() => {
