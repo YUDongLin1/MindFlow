@@ -69,7 +69,7 @@ async function runGenerate(modeOverride?: AIMode) {
 
   const cfg: AIConfig = {
     mode: (modeOverride || journalStore.prefs.aiMode) as AIMode,
-    apiKey: journalStore.prefs.aiKey,
+    apiKey: await journalStore.getAIKey(),
     aiBaseUrl: journalStore.prefs.aiBaseUrl,
     aiModel: journalStore.prefs.aiModel,
   }

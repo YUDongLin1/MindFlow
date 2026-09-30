@@ -173,9 +173,11 @@ export const useJournalStore = defineStore('journal', () => {
       // 必须先序列化为纯 JSON 快照再写盘。
       // 数据字段均为 string/number/boolean/纯对象（时间戳为 ISO 字符串，无 Date 对象），JSON 安全；
       // undefined 字段会被 JSON 序列化丢弃，与既有读取逻辑（字段存在性判断）语义一致。
+      // 安全：prefs.aiKey 仅保留在内存中，磁盘快照里强制清空。
+      // 真正的 Key 由系统密钥库（safeStorage，经 window.api.keychain）保管。
       const snapshot = JSON.parse(JSON.stringify({
         entries: entries.value,
-        prefs: prefs.value,
+        prefs: { ...prefs.value, aiKey: '' },
         audit: auditLog.value,
         customModules: customModules.value,
       }))
@@ -203,6 +205,10 @@ export const useJournalStore = defineStore('journal', () => {
           entries.value = data.entries
         }
         if (data.prefs) prefs.value = { ...prefs.value, ...data.prefs }
+        // 旧版本曾把 API Key 明文写盘：迁移到系统密钥库后清除磁盘明文
+        if (data.prefs && typeof data.prefs.aiKey === 'string' && data.prefs.aiKey) {
+          await migrateLegacyAIKey(data.prefs.aiKey)
+        }
         if (data.audit) auditLog.value = data.audit
         if (Array.isArray(data.customModules)) customModules.value = data.customModules
       }
@@ -285,8 +291,70 @@ export const useJournalStore = defineStore('journal', () => {
     await persist()
   }
 
+  function hasKeychain(): boolean {
+    return typeof window !== 'undefined' && !!(window as any).api?.keychain
+  }
+
   async function setAIKey(key: string) {
+    // Key 只进内存 + 系统密钥库，不再以明文落盘（persist 会剥离 aiKey）
     prefs.value.aiKey = key
+    if (hasKeychain()) {
+      try {
+        const res = await (window as any).api.keychain.set(key)
+        if (!res?.success) console.warn('[journal] keychain.set failed:', res?.error)
+      } catch (e) {
+        console.warn('[journal] keychain.set error', e)
+      }
+    }
+    await persist()
+  }
+
+  async function getAIKey(): Promise<string> {
+    if (prefs.value.aiKey) return prefs.value.aiKey
+    if (hasKeychain()) {
+      try {
+        const res = await (window as any).api.keychain.get()
+        if (res?.success && res.key) {
+          prefs.value.aiKey = res.key
+          return res.key
+        }
+      } catch (e) {
+        console.warn('[journal] keychain.get error', e)
+      }
+    }
+    return ''
+  }
+
+  async function clearAIKey() {
+    prefs.value.aiKey = ''
+    if (hasKeychain()) {
+      try {
+        await (window as any).api.keychain.delete()
+      } catch (e) {
+        console.warn('[journal] keychain.delete error', e)
+      }
+    }
+    await persist()
+  }
+
+  async function migrateLegacyAIKey(legacyKey: string) {
+    // 把磁盘上的旧明文 Key 搬进系统密钥库，然后用 persist() 把磁盘明文清掉
+    prefs.value.aiKey = legacyKey
+    if (hasKeychain()) {
+      try {
+        const res = await (window as any).api.keychain.set(legacyKey)
+        if (res?.success) {
+          prefs.value.aiKey = ''
+          auditLog.value.unshift({
+            ts: new Date().toISOString(),
+            action: 'ai_key_migrated',
+            detail: '旧明文 API Key 已迁移到系统密钥库，磁盘明文已清除',
+          })
+        }
+      } catch (e) {
+        console.warn('[journal] migrate legacy key failed', e)
+      }
+    }
     await persist()
   }
 
@@ -339,7 +407,7 @@ export const useJournalStore = defineStore('journal', () => {
     entriesByDate, entriesThisWeek, allEntries, todayEntries,
     // actions
     loadEntries, addEntry, updateEntry, deleteEntry,
-    toggleReviewMark, setAIReview, setAIMode, setAIKey, setAIPref, setE2EE, logAudit,
+    toggleReviewMark, setAIReview, setAIMode, setAIKey, getAIKey, clearAIKey, setAIPref, setE2EE, logAudit,
     addCustomModule, updateCustomModule, deleteCustomModule,
   }
 })

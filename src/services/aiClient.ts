@@ -32,6 +32,8 @@ export interface ProvenanceCheck {
   passed: boolean
   checkedAt: string
   failedSegments: string[]
+  /** 因过短或命中占位模式而免校验的段：注意这些段「未被校验」，不代表「已通过」 */
+  uncheckedSegments: string[]
 }
 
 export interface ReviewResult {
@@ -126,20 +128,27 @@ function shingleSet(text: string, n = 3): Set<string> {
 /**
  * 溯源覆盖率校验：检查 AI 生成的每段内容是否能回溯到用户原文。
  *
+ * 注意：这是启发式护栏，不是形式化保证——它能拦住明显的编造，
+ * 但不能在数学上证明「绝不编造」。
+ *
  * 规则：
- * - 段长度 < 8 或匹配占位模式 → 免校验（exempt）
- * - coverage = matched shingles / segment shingles，阈值 >= 0.35 视为通过
+ * - 段长度 < 8 或匹配占位模式 → 免校验（exempt），记入 uncheckedSegments
+ * - coverage = matched shingles / segment shingles，阈值 >= PROVENANCE_COVERAGE_THRESHOLD 视为通过
  * - 模型自报 accuracyFlag=true 但 passed=false → 强制 false
  *
  * @param userText 用户原始输入文本（拼接所有 prompt value）
  * @param segments AI 生成的四段内容
  */
+
+/** 溯源覆盖率通过阈值：一段中至少 55% 的 3 字片段能在原文中找到才算通过 */
+const PROVENANCE_COVERAGE_THRESHOLD = 0.55
 export function checkProvenance(
   userText: string,
   segments: AIReviewSegment
 ): ProvenanceCheck {
   const sourceSet = shingleSet(userText)
   const failedSegments: string[] = []
+  const uncheckedSegments: string[] = []
   let totalCoverage = 0
   let checkedCount = 0
 
@@ -151,8 +160,9 @@ export function checkProvenance(
   ]
 
   for (const [label, segText] of segmentValues) {
-    // 短文本或占位文本免校验
+    // 短文本或占位文本免校验，但明确记录为「未校验」而非「通过」
     if (segText.length < 8 || isPlaceholder(segText)) {
+      uncheckedSegments.push(label)
       continue
     }
 
@@ -167,7 +177,7 @@ export function checkProvenance(
     totalCoverage += coverage
     checkedCount++
 
-    if (coverage < 0.35) {
+    if (coverage < PROVENANCE_COVERAGE_THRESHOLD) {
       failedSegments.push(label)
     }
   }
@@ -179,6 +189,7 @@ export function checkProvenance(
     passed: failedSegments.length === 0,
     checkedAt: new Date().toISOString(),
     failedSegments,
+    uncheckedSegments,
   }
 }
 
