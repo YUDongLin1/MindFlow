@@ -91,7 +91,7 @@
       "output": "dist-electron",
       "buildResources": "build-resources"
     },
-    "disableAsarIntegrity": true,
+    "disableAsarIntegrity": false,
     "extraMetadata": {
       "main": "electron/dist/main.js"
     },

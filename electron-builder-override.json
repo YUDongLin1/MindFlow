@@ -1,6 +1,6 @@
 {
   "electronDist": "E:\\mindflow-electron-dist",
-  "disableAsarIntegrity": true,
+  "disableAsarIntegrity": false,
   "directories": {
     "output": "E:\\mindflow-release-build",
     "buildResources": "E:\\研究生文件\\moodnote\\build-resources"
